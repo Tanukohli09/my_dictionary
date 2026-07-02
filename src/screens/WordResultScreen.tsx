@@ -6,12 +6,15 @@ import { SavedStamp } from '../components/SavedStamp';
 import { WordDefinitionBlock } from '../components/WordDefinitionBlock';
 import { WordEntry } from '../models/WordEntry';
 import { toggleSavedWordFavourite } from '../modules/savedWordCollection';
-import { colors } from '../theme/colors';
+import { AppColors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
 import { typography } from '../theme/typography';
 import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
 
 export function WordResultScreen({ word, created, onBack, onChanged }: { word: WordEntry; created: boolean; onBack: () => void; onChanged: (w: WordEntry) => void }) {
   const { isTabletUp } = useResponsiveLayout();
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   async function toggleFavorite() { onChanged(await toggleSavedWordFavourite(word)); }
   return (
     <ScrollView style={styles.screen} contentContainerStyle={[styles.content, isTabletUp && styles.contentWide]} showsVerticalScrollIndicator={false}>
@@ -30,7 +33,7 @@ export function WordResultScreen({ word, created, onBack, onChanged }: { word: W
     </ScrollView>
   );
 }
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: 24, paddingTop: 14, paddingBottom: 40 },
   contentWide: { paddingHorizontal: 40, paddingTop: 28, paddingBottom: 54 },

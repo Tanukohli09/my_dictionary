@@ -1,7 +1,9 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { TabName } from './BottomTabs';
-import { colors } from '../theme/colors';
+import { ThemeToggle } from './ThemeToggle';
+import { AppColors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
 import { typography } from '../theme/typography';
 import { layout } from '../theme/breakpoints';
 
@@ -13,6 +15,8 @@ const items: { tab: TabName; icon: string; title: string; subtitle: string }[] =
 ];
 
 export function DesktopNavigation({ active, onChange }: { active: TabName; onChange: (tab: TabName) => void }) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   return (
     <View style={styles.sidebar}>
       <View style={styles.brand}>
@@ -34,11 +38,12 @@ export function DesktopNavigation({ active, onChange }: { active: TabName; onCha
           );
         })}
       </View>
+      <View style={styles.theme}><ThemeToggle /></View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   sidebar: {
     width: layout.desktopSidebarWidth,
     borderRightWidth: 1,
@@ -52,6 +57,7 @@ const styles = StyleSheet.create({
   logoStrong: { fontFamily: typography.serif, color: colors.text, fontSize: 27, lineHeight: 30, fontWeight: '900' },
   tagline: { color: colors.muted, fontSize: 12, marginTop: 8 },
   items: { gap: 8 },
+  theme: { marginTop: 'auto' },
   item: { flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: 14, paddingHorizontal: 12, paddingVertical: 12 },
   selected: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border },
   icon: { width: 30, textAlign: 'center', color: colors.text, fontSize: 19, fontWeight: '900' },

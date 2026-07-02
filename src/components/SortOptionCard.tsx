@@ -1,8 +1,11 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors } from '../theme/colors';
+import { AppColors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
 
 export function SortOptionCard({ title, subtitle, icon, selected, onPress }: { title: string; subtitle: string; icon: string; selected: boolean; onPress: () => void }) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   return (
     <Pressable onPress={onPress} style={styles.row}>
       <Text style={[styles.icon, title === 'Favourites' && styles.star]}>{icon}</Text>
@@ -11,7 +14,7 @@ export function SortOptionCard({ title, subtitle, icon, selected, onPress }: { t
     </Pressable>
   );
 }
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   row: { minHeight: 72, flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 15, borderBottomWidth: 1, borderColor: colors.border, backgroundColor: colors.cardLight },
   icon: { width: 34, color: colors.text, fontWeight: '900', fontSize: 20, textAlign: 'center' },
   star: { color: colors.yellow },

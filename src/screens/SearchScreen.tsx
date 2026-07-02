@@ -8,7 +8,8 @@ import { SearchBar } from '../components/SearchBar';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { WordEntry } from '../models/WordEntry';
 import { searchSavedWord } from '../modules/savedWordCollection';
-import { colors } from '../theme/colors';
+import { AppColors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
 import { typography } from '../theme/typography';
 import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
 import { greeting } from '../utils/dateUtils';
@@ -18,6 +19,8 @@ const sample = { word: 'Ephemeral', phonetic: '/ɪˈfemərəl/', meaning_short: 
 
 export function SearchScreen({ words, reload, openResult, openDetail, goDictionary, onMenu }: { words: WordEntry[]; reload: () => Promise<void>; openResult: (word: WordEntry, created: boolean) => void; openDetail: (word: WordEntry) => void; goDictionary: () => void; onMenu?: () => void }) {
   const { isTabletUp } = useResponsiveLayout();
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const recent = [...words].sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 3);
@@ -69,7 +72,7 @@ export function SearchScreen({ words, reload, openResult, openDetail, goDictiona
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: 22, paddingTop: 10, paddingBottom: 26 },
   contentWide: { paddingHorizontal: 36, paddingTop: 28, paddingBottom: 44 },

@@ -9,11 +9,14 @@ import { ScreenHeader } from '../components/ScreenHeader';
 import { WordCard } from '../components/WordCard';
 import { prepareDictionaryList, emptyDictionaryTitle } from '../modules/dictionaryList';
 import { SortMode, WordEntry } from '../models/WordEntry';
-import { colors } from '../theme/colors';
+import { AppColors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
 import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
 
 export function DictionaryScreen({ words, openDetail, goSearch, sort, onSortOpen, onMenu }: { words: WordEntry[]; openDetail: (w: WordEntry) => void; goSearch: () => void; sort: SortMode; onSortOpen: () => void; onMenu?: () => void }) {
   const { isTabletUp } = useResponsiveLayout();
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const [query, setQuery] = useState('');
   const scroll = useRef<ScrollView>(null);
   const positions = useRef<Record<string, number>>({});
@@ -32,7 +35,7 @@ export function DictionaryScreen({ words, openDetail, goSearch, sort, onSortOpen
     {list.mode === 'sections' && !!list.letters.length && <AlphabetIndex available={list.letters} onPress={(letter) => scroll.current?.scrollTo({ y: positions.current[letter] || 0, animated: true })} />}
   </View>;
 }
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: 22, paddingTop: 10, paddingRight: 34, paddingBottom: 42 },
   contentWide: { paddingHorizontal: 36, paddingTop: 28, paddingRight: 52, paddingBottom: 52 },

@@ -1,13 +1,16 @@
 import React from 'react';
 import { StyleSheet, View, ViewProps } from 'react-native';
-import { colors } from '../theme/colors';
+import { AppColors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
 import { radius, spacing } from '../theme/spacing';
 
 export function PaperCard({ style, ...props }: ViewProps) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   return <View {...props} style={[styles.card, style]} />;
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   card: {
     backgroundColor: colors.cardLight,
     borderColor: colors.border,

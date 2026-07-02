@@ -17,12 +17,13 @@ import { WordDetailScreen } from '../screens/WordDetailScreen';
 import { WordResultScreen } from '../screens/WordResultScreen';
 import { loadSavedWords } from '../modules/savedWordCollection';
 import { hasOnboarded, setOnboarded } from '../services/wordStorage';
-import { colors } from '../theme/colors';
 import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
+import { useTheme } from '../theme/ThemeContext';
 import { initialNavigationState, navigationFlowReducer, projectedScreen, requestedScreenFromUrl, shouldShowBottomTabs } from './navigationFlow';
 
 export function AppNavigator() {
   const { isTabletUp } = useResponsiveLayout();
+  const { colors } = useTheme();
   const [ready, setReady] = useState(false);
   const [onboarded, setOnboardedState] = useState(false);
   const [words, setWords] = useState<WordEntry[]>([]);

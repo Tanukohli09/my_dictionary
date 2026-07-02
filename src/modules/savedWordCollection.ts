@@ -1,5 +1,6 @@
 import { fetchWordEntry } from '../services/dictionaryApi';
-import { deleteStoredWord, loadWordEntries, persistWordEntries, upsertStoredWord } from '../services/wordStorage';
+import { deleteStoredWord, loadReviewSubmissions as loadStoredReviewSubmissions, loadWordEntries, persistWordEntries, saveReviewSubmission as saveStoredReviewSubmission, upsertStoredWord } from '../services/wordStorage';
+import { ReviewSubmission } from '../models/ReviewSubmission';
 import { WordEntry } from '../models/WordEntry';
 import { normalizeWord } from '../utils/normalizeWord';
 
@@ -53,13 +54,23 @@ export async function removeSavedWord(entry: WordEntry): Promise<void> {
 }
 
 export async function recordReviewAnswer(entry: WordEntry, correct: boolean): Promise<WordEntry> {
-  const correctCount = entry.correct_count + (correct ? 1 : 0);
+  const words = await loadWordEntries();
+  const current = words.find((word) => word.id === entry.id || word.normalized_word === entry.normalized_word) || entry;
+  const correctCount = current.correct_count + (correct ? 1 : 0);
   return saveSavedWord({
-    ...entry,
-    reviewed_count: entry.reviewed_count + 1,
+    ...current,
+    reviewed_count: current.reviewed_count + 1,
     correct_count: correctCount,
     mastery_level: Math.min(5, Math.floor(correctCount / 2)),
   });
+}
+
+export async function loadReviewSubmissions(): Promise<ReviewSubmission[]> {
+  return loadStoredReviewSubmissions();
+}
+
+export async function saveReviewSubmission(submission: ReviewSubmission): Promise<ReviewSubmission> {
+  return saveStoredReviewSubmission(submission);
 }
 
 function touchSearch(entry: WordEntry): WordEntry {

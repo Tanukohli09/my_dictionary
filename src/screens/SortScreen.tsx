@@ -4,7 +4,8 @@ import { OwlMascot } from '../components/OwlMascot';
 import { ResponsivePage } from '../components/ResponsivePage';
 import { SortOptionCard } from '../components/SortOptionCard';
 import { SortMode } from '../models/WordEntry';
-import { colors } from '../theme/colors';
+import { AppColors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
 import { typography } from '../theme/typography';
 import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
 
@@ -17,6 +18,8 @@ const opts: { mode: SortMode; title: string; subtitle: string; icon: string }[] 
 
 export function SortScreen({ selected, onSelect, onBack }: { selected: SortMode; onSelect: (m: SortMode) => void; onBack: () => void }) {
   const { isTabletUp } = useResponsiveLayout();
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   return (
     <View style={[styles.screen, isTabletUp && styles.screenWide]}>
       <ResponsivePage>
@@ -35,7 +38,7 @@ export function SortScreen({ selected, onSelect, onBack }: { selected: SortMode;
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page, paddingHorizontal: 24, paddingTop: 8 },
   screenWide: { paddingHorizontal: 40, paddingTop: 28 },
   header: { minHeight: 22 },

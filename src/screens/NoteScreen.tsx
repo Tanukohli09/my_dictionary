@@ -3,7 +3,8 @@ import { Image, ScrollView, StyleSheet, Text, TextInput, View } from 'react-nati
 import { ResponsivePage } from '../components/ResponsivePage';
 import { WordEntry } from '../models/WordEntry';
 import { saveSavedWordMeaning } from '../modules/savedWordCollection';
-import { colors } from '../theme/colors';
+import { AppColors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
 import { typography } from '../theme/typography';
 import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
 
@@ -11,6 +12,8 @@ const flower = require('../assets/flower.png');
 
 export function NoteScreen({ word, onBack, onSaved }: { word: WordEntry; onBack: () => void; onSaved: (w: WordEntry) => void }) {
   const { isTabletUp } = useResponsiveLayout();
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const [note, setNote] = useState(word.my_meaning || '');
   async function save() { onSaved(await saveSavedWordMeaning(word, note)); }
   return (
@@ -25,7 +28,7 @@ export function NoteScreen({ word, onBack, onSaved }: { word: WordEntry; onBack:
     </ScrollView>
   );
 }
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: 24, paddingTop: 16, paddingBottom: 28 },
   contentWide: { paddingHorizontal: 40, paddingTop: 30, paddingBottom: 52 },

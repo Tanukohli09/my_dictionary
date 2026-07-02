@@ -9,7 +9,9 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
-    "test:navigation": "playwright test e2e/navigation.spec.js --config=playwright.config.js --workers=1"
+    "test:navigation": "playwright test e2e/navigation.spec.js --config=playwright.config.js --workers=1",
+    "test:review": "node scripts/test-review-session.js && node scripts/test-review-history.js && node scripts/test-review-layout.js",
+    "test:owl": "node scripts/test-owl-mascot.js"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",

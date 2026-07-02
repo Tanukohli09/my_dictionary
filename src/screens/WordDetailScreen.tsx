@@ -3,13 +3,16 @@ import { Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View } fro
 import { ResponsivePage } from '../components/ResponsivePage';
 import { WordEntry } from '../models/WordEntry';
 import { saveSavedWordMeaning, toggleSavedWordFavourite } from '../modules/savedWordCollection';
-import { colors } from '../theme/colors';
+import { AppColors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
 import { typography } from '../theme/typography';
 import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
 import { formatDate } from '../utils/dateUtils';
 
 export function WordDetailScreen({ word, onBack, onChanged, openNote }: { word: WordEntry; onBack: () => void; onChanged: (w: WordEntry) => void; openNote: (w: WordEntry) => void }) {
   const { isTabletUp } = useResponsiveLayout();
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const [myMeaning, setMyMeaning] = useState(word.my_meaning || '');
   async function saveMeaning() { onChanged(await saveSavedWordMeaning(word, myMeaning)); }
   async function toggleFavorite() { onChanged(await toggleSavedWordFavourite(word)); }
@@ -49,7 +52,7 @@ export function WordDetailScreen({ word, onBack, onChanged, openNote }: { word: 
     </ScrollView>
   );
 }
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: 24, paddingTop: 14, paddingBottom: 42 },
   contentWide: { paddingHorizontal: 40, paddingTop: 28, paddingBottom: 54 },
@@ -73,7 +76,7 @@ const styles = StyleSheet.create({
   label: { color: colors.text, fontSize: 12, fontWeight: '900', marginBottom: 6 },
   body: { color: colors.text, fontSize: 13, lineHeight: 19 },
   syn: { color: colors.greenDark, fontSize: 13, lineHeight: 19, fontWeight: '800' },
-  myCard: { marginTop: 13, backgroundColor: colors.card, borderWidth: 1, borderColor: '#E8B95D', borderRadius: 9, padding: 12 },
+  myCard: { marginTop: 13, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.yellow, borderRadius: 9, padding: 12 },
   myCardWide: { width: 330, minHeight: 170, borderRadius: 16, padding: 18, marginTop: 0 },
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   edit: { color: colors.text, fontSize: 19 },

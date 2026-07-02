@@ -1,7 +1,9 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { TabName } from './BottomTabs';
-import { colors } from '../theme/colors';
+import { ThemeToggle } from './ThemeToggle';
+import { AppColors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
 import { typography } from '../theme/typography';
 
 const items: { tab: TabName; icon: string; title: string; subtitle: string }[] = [
@@ -12,6 +14,8 @@ const items: { tab: TabName; icon: string; title: string; subtitle: string }[] =
 ];
 
 export function AppMenu({ visible, active, onClose, onNavigate }: { visible: boolean; active: TabName; onClose: () => void; onNavigate: (tab: TabName) => void }) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   if (!visible) return null;
   return (
     <View style={styles.overlay}>
@@ -34,12 +38,13 @@ export function AppMenu({ visible, active, onClose, onNavigate }: { visible: boo
             </Pressable>
           );
         })}
+        <View style={styles.toggleWrap}><ThemeToggle /></View>
       </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   overlay: { ...StyleSheet.absoluteFillObject, zIndex: 90, justifyContent: 'flex-end', backgroundColor: 'rgba(58, 32, 17, 0.10)' },
   sheet: { marginHorizontal: 18, marginBottom: 18, borderWidth: 1, borderColor: colors.border, borderRadius: 18, backgroundColor: colors.cardLight, padding: 14, shadowColor: colors.shadow, shadowOpacity: 0.22, shadowRadius: 18, shadowOffset: { width: 0, height: 8 } },
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
@@ -51,4 +56,5 @@ const styles = StyleSheet.create({
   itemTitle: { color: colors.text, fontSize: 14, fontWeight: '900' },
   subtitle: { color: colors.muted, fontSize: 11, marginTop: 2 },
   check: { color: colors.greenDark, fontSize: 20, fontWeight: '900' },
+  toggleWrap: { marginTop: 10 },
 });

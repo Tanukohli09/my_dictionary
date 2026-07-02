@@ -2,8 +2,10 @@ import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { OwlMascot } from '../components/OwlMascot';
 import { ResponsivePage } from '../components/ResponsivePage';
+import { ThemeToggle } from '../components/ThemeToggle';
 import { WordEntry } from '../models/WordEntry';
-import { colors } from '../theme/colors';
+import { AppColors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
 import { typography } from '../theme/typography';
 import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
 import { groupAlphabetically } from '../utils/groupWords';
@@ -28,6 +30,8 @@ type StatCard = {
 
 export function ProfileScreen({ words, onBack, onDictionary, onReview }: ProfileScreenProps) {
   const { isTabletUp } = useResponsiveLayout();
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const demoMode = words.length <= 10 && words.some((word) => word.source === 'demo');
   const reviewed = words.reduce((n, w) => n + w.reviewed_count, 0);
   const favourites = words.filter((w) => w.is_favorite).length;
@@ -45,7 +49,7 @@ export function ProfileScreen({ words, onBack, onDictionary, onReview }: Profile
   const mainStats: StatCard[] = [
     { label: 'Total Words', value: display.total, color: colors.greenDark, hint: 'Browse dictionary', action: 'dictionary', accessibilityLabel: 'Open dictionary from total words' },
     { label: 'Reviewed', value: display.reviewed, color: colors.greenDark, hint: 'Practice again', action: 'review', accessibilityLabel: 'Open review from reviewed words' },
-    { label: 'Favourites', value: display.favourites, color: '#D85F3E', hint: 'See saved words', action: 'dictionary', accessibilityLabel: 'Open dictionary from favourites' },
+    { label: 'Favourites', value: display.favourites, color: colors.bookmark, hint: 'See saved words', action: 'dictionary', accessibilityLabel: 'Open dictionary from favourites' },
   ];
 
   const smallStats: StatCard[] = [
@@ -85,12 +89,14 @@ export function ProfileScreen({ words, onBack, onDictionary, onReview }: Profile
           {!isTabletUp && <Text style={styles.xp}>{display.xp} / {display.next} XP</Text>}
         </View>
 
+        <View style={[styles.themeRow, isTabletUp && styles.themeRowWide]}><ThemeToggle /></View>
+
         <View style={[styles.stats, isTabletUp && styles.statsWide]}>
-          {mainStats.map((stat) => <ProfileStatCard key={stat.label} stat={stat} isWide={isTabletUp} onPress={() => runAction(stat.action)} />)}
+          {mainStats.map((stat) => <ProfileStatCard key={stat.label} stat={stat} isWide={isTabletUp} onPress={() => runAction(stat.action)} styles={styles} colors={colors} />)}
         </View>
 
         <View style={[styles.smallStats, isTabletUp && styles.smallStatsWide]}>
-          {smallStats.map((stat) => <ProfileMiniCard key={stat.label} stat={stat} isWide={isTabletUp} onPress={() => runAction(stat.action)} />)}
+          {smallStats.map((stat) => <ProfileMiniCard key={stat.label} stat={stat} isWide={isTabletUp} onPress={() => runAction(stat.action)} styles={styles} />)}
         </View>
 
         <Text style={[styles.section, isTabletUp && styles.sectionWide]}>Words by alphabet</Text>
@@ -102,7 +108,7 @@ export function ProfileScreen({ words, onBack, onDictionary, onReview }: Profile
   );
 }
 
-function ProfileStatCard({ stat, isWide, onPress }: { stat: StatCard; isWide: boolean; onPress: () => void }) {
+function ProfileStatCard({ stat, isWide, onPress, styles, colors }: { stat: StatCard; isWide: boolean; onPress: () => void; styles: ProfileStyles; colors: AppColors }) {
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={stat.accessibilityLabel} onPress={onPress} style={({ pressed }) => [styles.stat, isWide && styles.statWide, pressed && styles.pressed]}>
       <Text style={[styles.statLabel, isWide && styles.statLabelWide]}>{stat.label}</Text>
@@ -112,7 +118,7 @@ function ProfileStatCard({ stat, isWide, onPress }: { stat: StatCard; isWide: bo
   );
 }
 
-function ProfileMiniCard({ stat, isWide, onPress }: { stat: StatCard; isWide: boolean; onPress: () => void }) {
+function ProfileMiniCard({ stat, isWide, onPress, styles }: { stat: StatCard; isWide: boolean; onPress: () => void; styles: ProfileStyles }) {
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={stat.accessibilityLabel} onPress={onPress} style={({ pressed }) => [styles.smallStat, isWide && styles.smallStatWide, pressed && styles.pressed]}>
       <Text style={[styles.smallStatLabel, isWide && styles.smallStatLabelWide]}>{stat.label}</Text>
@@ -122,7 +128,9 @@ function ProfileMiniCard({ stat, isWide, onPress }: { stat: StatCard; isWide: bo
   );
 }
 
-const styles = StyleSheet.create({
+type ProfileStyles = ReturnType<typeof createStyles>;
+
+const createStyles = (colors: AppColors) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: 24, paddingTop: 16, paddingBottom: 38 },
   contentWide: { paddingHorizontal: 40, paddingTop: 10, paddingBottom: 52 },
@@ -143,10 +151,12 @@ const styles = StyleSheet.create({
   level: { fontFamily: typography.sans, color: colors.text, fontSize: 20, fontWeight: '800' },
   levelWide: { fontFamily: typography.serif, fontSize: 42, lineHeight: 50, fontWeight: '900' },
   progressLine: { flexDirection: 'row', alignItems: 'center', gap: 18, marginTop: 10 },
-  progress: { flex: 1, maxWidth: 820, height: 8, backgroundColor: '#E6DCCB', borderRadius: 999, overflow: 'hidden' },
+  progress: { flex: 1, maxWidth: 820, height: 8, backgroundColor: colors.input, borderRadius: 999, overflow: 'hidden' },
   progressFill: { height: '100%', backgroundColor: colors.green, borderRadius: 999 },
   xp: { color: colors.muted, fontSize: 9, alignSelf: 'center' },
   xpInline: { color: colors.muted, fontSize: 11, fontWeight: '700', minWidth: 94, textAlign: 'right' },
+  themeRow: { marginBottom: 16 },
+  themeRowWide: { maxWidth: 480 },
   stats: { flexDirection: 'row', gap: 10, marginBottom: 14 },
   statsWide: { gap: 20, marginBottom: 18 },
   stat: { flex: 1, minHeight: 76, borderWidth: 1, borderColor: colors.border, borderRadius: 8, backgroundColor: colors.cardLight, alignItems: 'center', justifyContent: 'center', padding: 10 },
@@ -174,7 +184,7 @@ const styles = StyleSheet.create({
   alphaRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   alphaRowWide: { minHeight: 20, gap: 16 },
   alphaLetter: { color: colors.text, width: 18, fontSize: 11, fontWeight: '700' },
-  bar: { flex: 1, height: 6, backgroundColor: '#E6DCCB', borderRadius: 999, overflow: 'hidden' },
+  bar: { flex: 1, height: 6, backgroundColor: colors.input, borderRadius: 999, overflow: 'hidden' },
   barFill: { height: '100%', backgroundColor: colors.green, borderRadius: 999 },
   alphaCount: { width: 24, color: colors.text, textAlign: 'right', fontWeight: '800', fontSize: 12 },
   emptyText: { color: colors.muted, fontSize: 13, lineHeight: 20 },

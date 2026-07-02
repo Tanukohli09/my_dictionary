@@ -1,12 +1,19 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
-import { colors } from '../theme/colors';
+import { AppColors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
 
 export function BookmarkButton({ active, onPress }: { active: boolean; onPress: () => void }) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   return <Pressable onPress={onPress} style={[styles.button, active && styles.active]}><Text style={styles.text}>{active ? '♥' : '♡'}</Text></Pressable>;
 }
-export function BookmarkRibbon() { return <Text style={styles.ribbon}>▾</Text>; }
-const styles = StyleSheet.create({
+export function BookmarkRibbon() {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
+  return <Text style={styles.ribbon}>▾</Text>;
+}
+const createStyles = (colors: AppColors) => StyleSheet.create({
   button: { width: 36, height: 36, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   active: { backgroundColor: 'transparent' },
   text: { color: colors.bookmark, fontSize: 22 },

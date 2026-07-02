@@ -3,12 +3,15 @@ import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { OwlMascot } from '../components/OwlMascot';
 import { PrimaryButton } from '../components/PrimaryButton';
-import { colors } from '../theme/colors';
+import { AppColors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
 import { typography } from '../theme/typography';
 import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
 
 export function OnboardingScreen({ onStart }: { onStart: () => void }) {
   const { isTabletUp } = useResponsiveLayout();
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   return (
     <SafeAreaView style={[styles.screen, isTabletUp && styles.screenWide]}>
       <Text style={[styles.spark, styles.sparkLeft]}>✦</Text>
@@ -27,7 +30,7 @@ export function OnboardingScreen({ onStart }: { onStart: () => void }) {
     </SafeAreaView>
   );
 }
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 30 },
   screenWide: { paddingHorizontal: 64 },
   layout: { alignItems: 'center' },
@@ -35,9 +38,9 @@ const styles = StyleSheet.create({
   copyColumn: { alignItems: 'center', maxWidth: 430 },
   titleBlock: { alignItems: 'center', marginBottom: 22 },
   titleBlockWide: { alignItems: 'flex-start' },
-  title: { fontFamily: typography.serif, color: '#5A301B', fontSize: 46, lineHeight: 50, fontWeight: '900', textAlign: 'center' },
+  title: { fontFamily: typography.serif, color: colors.text, fontSize: 46, lineHeight: 50, fontWeight: '900', textAlign: 'center' },
   titleWide: { fontSize: 72, lineHeight: 76, textAlign: 'left' },
-  subtitle: { color: '#5A301B', fontSize: 15, marginTop: 10 },
+  subtitle: { color: colors.text, fontSize: 15, marginTop: 10 },
   owlStage: { width: 230, height: 220, alignItems: 'center', justifyContent: 'center', marginBottom: 14 },
   owlStageWide: { width: 330, height: 320 },
   body: { color: colors.muted, textAlign: 'center', lineHeight: 23, fontSize: 14, marginBottom: 18 },

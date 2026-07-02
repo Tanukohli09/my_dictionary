@@ -15,6 +15,7 @@ A cross-platform dictionary and vocabulary learning app built with Expo, React N
 - Review saved words with quiz-style practice
 - Profile screen with learning progress stats
 - Responsive layout for mobile, tablet, desktop, and web
+- Day/night mode with a persisted theme toggle
 - Local persistence with AsyncStorage
 
 ## Tech Stack
