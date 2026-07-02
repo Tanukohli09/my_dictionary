@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "My Dictionary",
+    "slug": "my-dictionary",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": { "backgroundColor": "#FFF8E7" },
+    "assetBundlePatterns": ["**/*"],
+    "ios": { "supportsTablet": true },
+    "android": { "adaptiveIcon": { "backgroundColor": "#FFF8E7" } },
+    "web": { "bundler": "metro" }
+  }
+}
