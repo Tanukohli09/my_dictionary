@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { ResponsivePage } from '../components/ResponsivePage';
 import { WordEntry } from '../models/WordEntry';
 import { saveSavedWordMeaning } from '../modules/savedWordCollection';
@@ -19,9 +19,9 @@ export function NoteScreen({ word, onBack, onSaved }: { word: WordEntry; onBack:
   return (
     <ScrollView style={styles.screen} contentContainerStyle={[styles.content, isTabletUp && styles.contentWide]} showsVerticalScrollIndicator={false}>
       <ResponsivePage style={isTabletUp && styles.pageWide}>
-        <View style={styles.header}><Text onPress={onBack} style={styles.back}>‹</Text><Text style={[styles.title, isTabletUp && styles.titleWide]}>My Meaning</Text><Text onPress={save} style={styles.check}>✓</Text></View>
+        <View style={styles.header}><Pressable accessibilityRole="button" accessibilityLabel="Back to word detail" onPress={onBack} hitSlop={8} style={styles.backButton}><Text style={styles.back}>‹</Text></Pressable><Text style={[styles.title, isTabletUp && styles.titleWide]}>My Meaning</Text><Pressable accessibilityRole="button" accessibilityLabel="Save my meaning" onPress={save} hitSlop={8} style={styles.saveButton}><Text style={styles.check}>✓</Text></Pressable></View>
         <View style={[styles.notePaper, isTabletUp && styles.notePaperWide]}>
-          <TextInput multiline value={note} onChangeText={setNote} placeholder="Write your own simple meaning..." placeholderTextColor={colors.muted} textAlignVertical="top" style={[styles.area, isTabletUp && styles.areaWide]} />
+          <TextInput accessibilityLabel="Your personal meaning" multiline value={note} onChangeText={setNote} placeholder="Write your own simple meaning..." placeholderTextColor={colors.muted} textAlignVertical="top" style={[styles.area, isTabletUp && styles.areaWide]} />
           <Image source={flower} resizeMode="contain" style={[styles.flower, isTabletUp && styles.flowerWide]} />
         </View>
       </ResponsivePage>
@@ -34,10 +34,12 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
   contentWide: { paddingHorizontal: 40, paddingTop: 30, paddingBottom: 52 },
   pageWide: { maxWidth: 880 },
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: 22 },
-  back: { color: colors.text, fontSize: 34, lineHeight: 38, flex: 1 },
+  backButton: { flex: 1, alignItems: 'flex-start' },
+  back: { color: colors.text, fontSize: 34, lineHeight: 38 },
   title: { fontFamily: typography.serif, color: colors.text, fontSize: 21, fontWeight: '800', flex: 2, textAlign: 'center' },
   titleWide: { fontSize: 32 },
-  check: { flex: 1, color: colors.greenDark, fontSize: 20, fontWeight: '900', textAlign: 'right' },
+  saveButton: { flex: 1, alignItems: 'flex-end' },
+  check: { color: colors.greenDark, fontSize: 20, fontWeight: '900' },
   notePaper: { minHeight: 455, borderRadius: 12, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.card, padding: 16, overflow: 'hidden' },
   notePaperWide: { minHeight: 520, borderRadius: 18, padding: 28 },
   area: { width: 252, minHeight: 390, color: colors.text, fontSize: 19, lineHeight: 30, fontFamily: typography.serif, padding: 0, outlineStyle: 'none' as any },

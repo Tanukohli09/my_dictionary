@@ -8,7 +8,7 @@ import { typography } from '../theme/typography';
 export function SearchBar(props: TextInputProps) {
   const { colors } = useTheme();
   const styles = createStyles(colors);
-  return <View style={styles.wrap}><Text style={styles.icon}>⌕</Text><TextInput {...props} placeholderTextColor={colors.muted} style={styles.input} returnKeyType="search" /></View>;
+  return <View style={styles.wrap}><Text accessibilityElementsHidden style={styles.icon}>⌕</Text><TextInput {...props} accessibilityLabel={props.accessibilityLabel || props.placeholder || 'Search'} placeholderTextColor={colors.muted} style={styles.input} returnKeyType="search" /></View>;
 }
 const createStyles = (colors: AppColors) => StyleSheet.create({
   wrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.input, borderWidth: 1, borderColor: colors.border, borderRadius: 9, paddingHorizontal: spacing.md, minHeight: 38 },

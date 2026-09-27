@@ -48,16 +48,16 @@ test('desktop word detail my meaning edit opens note editor', async ({ page }) =
   await page.getByText('Flower').first().click();
   await expect(page.getByText('My meaning')).toBeVisible();
 
-  await page.getByText('♢').last().click();
+  await page.getByRole('button', { name: 'Edit my meaning' }).click();
   await expect(page.getByText('My Meaning')).toBeVisible();
 });
 
 test('desktop note editor saves text back to my meaning', async ({ page }) => {
   await page.goto('/?screen=detail', { waitUntil: 'networkidle' });
 
-  await page.getByText('♢').last().click();
+  await page.getByRole('button', { name: 'Edit my meaning' }).click();
   await page.getByPlaceholder('Write your own simple meaning...').fill('A blossom I want to remember.');
-  await page.getByText('✓').click();
+  await page.getByRole('button', { name: 'Save my meaning' }).click();
 
   await expect(page.getByText('My meaning')).toBeVisible();
   await expect(page.getByText('A blossom I want to remember.')).toBeVisible();

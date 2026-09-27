@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppMenu } from '../components/AppMenu';
 import { BottomTabs } from '../components/BottomTabs';
 import { DesktopNavigation } from '../components/DesktopNavigation';
+import { ErrorState } from '../components/ErrorState';
 import { PhoneFrame } from '../components/PhoneFrame';
 import { WordEntry } from '../models/WordEntry';
 import { DictionaryScreen } from '../screens/DictionaryScreen';
@@ -15,7 +16,8 @@ import { SearchScreen } from '../screens/SearchScreen';
 import { SortScreen } from '../screens/SortScreen';
 import { WordDetailScreen } from '../screens/WordDetailScreen';
 import { WordResultScreen } from '../screens/WordResultScreen';
-import { loadSavedWords } from '../modules/savedWordCollection';
+import { loadReviewSubmissions, loadSavedWords, removeSavedWord } from '../modules/savedWordCollection';
+import { ReviewSubmission } from '../models/ReviewSubmission';
 import { hasOnboarded, setOnboarded } from '../services/wordStorage';
 import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
 import { useTheme } from '../theme/ThemeContext';
@@ -27,17 +29,43 @@ export function AppNavigator() {
   const [ready, setReady] = useState(false);
   const [onboarded, setOnboardedState] = useState(false);
   const [words, setWords] = useState<WordEntry[]>([]);
+  const [reviewHistory, setReviewHistory] = useState<ReviewSubmission[]>([]);
+  const [storageError, setStorageError] = useState<string | null>(null);
   const [nav, dispatch] = useReducer(navigationFlowReducer, undefined, () => initialNavigationState());
-  const reload = useCallback(async () => setWords(await loadSavedWords()), []);
+  const loadLocalData = useCallback(async () => {
+    const [loadedWords, loadedHistory] = await Promise.all([loadSavedWords(), loadReviewSubmissions()]);
+    setWords(loadedWords);
+    setReviewHistory(loadedHistory);
+    return loadedWords;
+  }, []);
+  const reload = useCallback(async () => {
+    try {
+      await loadLocalData();
+      setStorageError(null);
+    } catch {
+      setStorageError('We could not load your saved dictionary. Your data has not been changed.');
+    }
+  }, [loadLocalData]);
 
-  useEffect(() => { (async () => {
-    setOnboardedState(await hasOnboarded());
-    const loaded = await loadSavedWords();
-    setWords(loaded);
-    const focus = loaded.find((word) => word.normalized_word === 'resilient') || loaded[0];
-    dispatch({ type: 'hydrateFromUrl', screen: requestedScreenFromUrl(), focus });
-    setReady(true);
-  })(); }, []);
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const [didOnboard, loaded, loadedHistory] = await Promise.all([hasOnboarded(), loadSavedWords(), loadReviewSubmissions()]);
+        if (!mounted) return;
+        setOnboardedState(didOnboard);
+        setWords(loaded);
+        setReviewHistory(loadedHistory);
+        const focus = loaded.find((word) => word.normalized_word === 'resilient') || loaded[0];
+        dispatch({ type: 'hydrateFromUrl', screen: requestedScreenFromUrl(), focus });
+      } catch {
+        if (mounted) setStorageError('We could not load your saved dictionary. Your data has not been changed.');
+      } finally {
+        if (mounted) setReady(true);
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
 
   useEffect(() => {
     if (!ready || Platform.OS !== 'web' || typeof window === 'undefined') return;
@@ -49,11 +77,13 @@ export function AppNavigator() {
   }, [ready, nav.route.name, nav.tab]);
 
   if (!ready) return <PhoneFrame><View style={{ flex: 1, backgroundColor: colors.background }} /></PhoneFrame>;
+  if (storageError) return <PhoneFrame><View style={{ flex: 1, justifyContent: 'center', backgroundColor: colors.page }}><ErrorState message={storageError} onRetry={reload} retryLabel="Retry loading data" /></View></PhoneFrame>;
   if (!onboarded) return <PhoneFrame><OnboardingScreen onStart={async () => { await setOnboarded(); setOnboardedState(true); }} /></PhoneFrame>;
 
   function currentWord(word: WordEntry) { return words.find((entry) => entry.id === word.id) || word; }
   const goTabs = () => { reload(); dispatch({ type: 'backToTabs' }); };
   const onChanged = async (word: WordEntry) => { await reload(); dispatch({ type: 'replaceRouteWord', word }); };
+  const onDeleted = async (word: WordEntry) => { await removeSavedWord(word); await reload(); dispatch({ type: 'backToTabs' }); };
 
   let content: React.ReactNode;
   if (nav.route.name === 'result') {
@@ -61,7 +91,7 @@ export function AppNavigator() {
     content = <WordResultScreen word={currentWord(route.word)} created={route.created} onBack={goTabs} onChanged={onChanged} />;
   } else if (nav.route.name === 'detail') {
     const route = nav.route;
-    content = <WordDetailScreen word={currentWord(route.word)} onBack={goTabs} onChanged={onChanged} openNote={(word) => dispatch({ type: 'openNote', word: currentWord(word) })} />;
+    content = <WordDetailScreen word={currentWord(route.word)} onBack={goTabs} onChanged={onChanged} onDelete={() => onDeleted(currentWord(route.word))} openNote={(word) => dispatch({ type: 'openNote', word: currentWord(word) })} />;
   } else if (nav.route.name === 'note') {
     const route = nav.route;
     const word = currentWord(route.word);
@@ -75,7 +105,7 @@ export function AppNavigator() {
         ? <DictionaryScreen words={words} openDetail={(word) => dispatch({ type: 'openDetail', word: currentWord(word) })} goSearch={() => dispatch({ type: 'openTab', tab: 'Search' })} sort={nav.dictionarySort} onSortOpen={() => dispatch({ type: 'openSort' })} onMenu={isTabletUp ? undefined : () => dispatch({ type: 'openMenu' })} />
         : nav.tab === 'Review'
           ? <ReviewScreen words={words} reload={reload} goSearch={() => dispatch({ type: 'openTab', tab: 'Search' })} />
-          : <ProfileScreen words={words} onBack={() => dispatch({ type: 'openTab', tab: 'Search' })} onDictionary={() => dispatch({ type: 'openTab', tab: 'Dictionary' })} onReview={() => dispatch({ type: 'openTab', tab: 'Review' })} />;
+          : <ProfileScreen words={words} reviewHistory={reviewHistory} onBack={() => dispatch({ type: 'openTab', tab: 'Search' })} onDictionary={() => dispatch({ type: 'openTab', tab: 'Dictionary' })} onFavourites={() => { dispatch({ type: 'selectSort', sort: 'favourites' }); dispatch({ type: 'openTab', tab: 'Dictionary' }); }} onReview={() => dispatch({ type: 'openTab', tab: 'Review' })} onDataChanged={reload} />;
   }
 
   return (

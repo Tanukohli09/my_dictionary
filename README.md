@@ -6,7 +6,7 @@ A cross-platform dictionary and vocabulary learning app built with Expo, React N
 
 ## Features
 
-- Search English words using the public [Dictionary API](https://dictionaryapi.dev/)
+- Search English words through a configurable dictionary provider
 - Save words to a personal dictionary
 - View definitions, examples, synonyms, antonyms, phonetics, and audio links when available
 - Add personal notes and custom meanings
@@ -33,7 +33,7 @@ A cross-platform dictionary and vocabulary learning app built with Expo, React N
 
 Install the following before running the project:
 
-- Node.js
+- Node.js 18 or newer
 - npm
 - Expo Go app on your phone, or an Android/iOS simulator
 
@@ -47,11 +47,13 @@ npm install
 
 ### Run the app
 
-Start the Expo development server:
+Start the web app and its local dictionary proxy:
 
 ```bash
-npm start
+npm run web
 ```
+
+For the browser app, use `npm run web` so the local dictionary proxy starts alongside Expo. Native builds use the public provider by default; set `EXPO_PUBLIC_DICTIONARY_API_URL` to use your hosted proxy instead.
 
 Run on specific platforms:
 
@@ -60,6 +62,43 @@ npm run android
 npm run ios
 npm run web
 ```
+
+### Production deployment
+
+The app is designed to use a real dictionary provider for every new lookup. The default provider is the public [Datamuse API](https://www.datamuse.com/api/) with a [Wiktionary](https://en.wiktionary.org/) fallback. The backend normalizes both responses into the format used by the app. The original [Free Dictionary API](https://dictionaryapi.dev/) remains available by setting `DICTIONARY_PROVIDER=dictionaryapi`.
+
+For a single-server deployment:
+
+1. Copy `.env.example` to your deployment environment and set `EXPO_PUBLIC_DICTIONARY_API_URL=/api/dictionary`.
+2. Build the Expo web bundle with `npm run build:web`.
+3. Set `NODE_ENV=production`, `DICTIONARY_ENV=production`, and `DICTIONARY_ALLOWED_ORIGIN` to the exact HTTPS website origin. Production startup rejects wildcard CORS.
+4. Set `DICTIONARY_PROVIDER_APPROVED=true` only after the selected provider’s quality, quota, terms, licensing, and attribution policy has been reviewed.
+5. Start the production server with `npm run start:prod`.
+6. Publish the server on `PORT` and set `HOST=0.0.0.0` in the hosting environment.
+
+The production server serves the exported web app, exposes `/api/dictionary/:word`, caches successful lookups, deduplicates simultaneous requests, rate-limits clients, applies security headers, emits request IDs and structured lookup logs, and falls back when the primary provider is unavailable. `/health` reports process state and `/ready` performs a live provider check. If `DICTIONARY_METRICS_TOKEN` is configured, `/metrics` exposes protected counters for monitoring. Put the service behind an HTTPS reverse proxy and enable `DICTIONARY_HSTS=true` only after TLS is active. If the web bundle and API are deployed separately, set `EXPO_PUBLIC_DICTIONARY_API_URL` to the public API URL instead.
+
+For a container-based staging or production deployment, build the included multi-stage image and provide the production environment variables at runtime:
+
+```bash
+docker build -t my-dictionary:staging .
+docker run --rm --env-file .env.staging -p 3000:10000 my-dictionary:staging
+```
+
+For Render, the repository includes [`render.yaml`](render.yaml). Create a Blueprint from the repository, choose the Free plan for staging, and provide the prompted values for `DICTIONARY_ALLOWED_ORIGIN` and `DICTIONARY_PROVIDER_APPROVED`. Render web services use port `10000` and the Blueprint configures `/health` as the health check.
+
+After deployment, run the release smoke check against the real staging URL:
+
+```bash
+RELEASE_BASE_URL=https://staging.example.com \
+RELEASE_WEB_ORIGIN=https://staging.example.com \
+RELEASE_SMOKE_WORD=owl \
+npm run release:smoke
+```
+
+The smoke check verifies `/health`, `/ready`, the exported web security headers, one real dictionary lookup, exact-origin CORS, and request IDs. Keep `.env.staging` outside source control.
+
+Never put `DICTIONARY_API_KEY` or other provider secrets in an `EXPO_PUBLIC_*` variable: Expo embeds those values in the client bundle.
 
 ## Available Scripts
 
@@ -85,7 +124,25 @@ Start the app on iOS.
 npm run web
 ```
 
-Start the web version.
+Start the web version and the local dictionary proxy.
+
+```bash
+npm run api
+```
+
+Start only the local dictionary proxy on port 3001.
+
+```bash
+npm run build:web
+```
+
+Create the production web bundle in `dist/`.
+
+```bash
+npm run start:prod
+```
+
+Serve the production web bundle and dictionary proxy from one Node process.
 
 ```bash
 npm run typecheck
@@ -99,6 +156,18 @@ npm run test:navigation
 
 Run the Playwright navigation test suite.
 
+```bash
+npm run test:e2e
+```
+
+Run the isolated browser and dictionary-provider contract suite.
+
+```bash
+npm run test:release
+```
+
+Run the deterministic release smoke contract locally against mock providers.
+
 ## Project Structure
 
 ```text
@@ -106,6 +175,8 @@ Run the Playwright navigation test suite.
 ├── App.tsx
 ├── app.json
 ├── e2e/                    # Playwright end-to-end tests
+├── server/
+│   └── dictionaryProxy.js  # Local web proxy for dictionary lookups
 ├── src/
 │   ├── assets/             # App images and illustrations
 │   ├── components/         # Reusable UI components
@@ -124,7 +195,7 @@ Run the Playwright navigation test suite.
 
 ## Notes
 
-- Word lookup depends on the external Dictionary API, so internet access is required for searching new words.
+- New-word lookup uses the configured dictionary provider and server-side fallback. A small bundled word pack is available only as a development fallback when `EXPO_PUBLIC_OFFLINE_FALLBACK=true`; it is not used by production builds and is not intended to replace a full dictionary provider.
 - Saved words and onboarding state are stored locally on the device/browser.
 - Generated folders such as `node_modules`, `.expo`, logs, test results, and screenshots are ignored by git.
 

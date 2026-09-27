@@ -1,4 +1,9 @@
 const { test, expect } = require('@playwright/test');
+const { makeWord, seedStorage } = require('./testData');
+
+test.beforeEach(async ({ page }) => {
+  await seedStorage(page, [makeWord('Resilient', 'Able to recover quickly')]);
+});
 
 test('desktop layout uses full website shell and persistent navigation', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });

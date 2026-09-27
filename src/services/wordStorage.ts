@@ -1,5 +1,4 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { demoWords } from '../data/demoWords';
 import { ReviewSubmission } from '../models/ReviewSubmission';
 import { WordEntry } from '../models/WordEntry';
 
@@ -13,7 +12,7 @@ export async function persistWordEntries(words: WordEntry[]) {
 
 export async function loadWordEntries(): Promise<WordEntry[]> {
   const raw = await AsyncStorage.getItem(KEY);
-  if (!raw) return demoWords;
+  if (!raw) return [];
   try { return JSON.parse(raw); } catch { return []; }
 }
 
@@ -49,6 +48,10 @@ export async function persistReviewSubmissions(submissions: ReviewSubmission[]) 
   await AsyncStorage.setItem(REVIEW_SUBMISSIONS_KEY, JSON.stringify(submissions));
 }
 
+export async function clearAllReviewSubmissions() {
+  await AsyncStorage.removeItem(REVIEW_SUBMISSIONS_KEY);
+}
+
 export async function saveReviewSubmission(submission: ReviewSubmission): Promise<ReviewSubmission> {
   const existing = await loadReviewSubmissions();
   const next = [submission, ...existing.filter((item) => item.id !== submission.id)]
@@ -60,7 +63,7 @@ export async function saveReviewSubmission(submission: ReviewSubmission): Promis
 
 export async function hasOnboarded() {
   const raw = await AsyncStorage.getItem(ONBOARDING_KEY);
-  return raw === null ? true : raw === 'yes';
+  return raw === 'yes';
 }
 
 export async function setOnboarded() { await AsyncStorage.setItem(ONBOARDING_KEY, 'yes'); }

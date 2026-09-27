@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { OwlMascot } from '../components/OwlMascot';
 import { ResponsivePage } from '../components/ResponsivePage';
 import { SortOptionCard } from '../components/SortOptionCard';
@@ -23,7 +23,7 @@ export function SortScreen({ selected, onSelect, onBack }: { selected: SortMode;
   return (
     <View style={[styles.screen, isTabletUp && styles.screenWide]}>
       <ResponsivePage>
-        <View style={styles.header}><Text onPress={onBack} style={styles.back}>‹</Text></View>
+        <View style={styles.header}><Pressable accessibilityRole="button" accessibilityLabel="Back to dictionary" onPress={onBack} hitSlop={8}><Text style={styles.back}>‹</Text></Pressable></View>
         <View style={[styles.layout, isTabletUp && styles.layoutWide]}>
           <View style={styles.optionsColumn}>
             <Text style={[styles.title, isTabletUp && styles.titleWide]}>Sort by</Text>

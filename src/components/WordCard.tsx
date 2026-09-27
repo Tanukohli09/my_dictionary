@@ -9,7 +9,7 @@ import { BookmarkRibbon } from './BookmarkButton';
 export function WordCard({ word, onPress, meta }: { word: WordEntry; onPress: () => void; meta?: string }) {
   const { colors } = useTheme();
   const styles = createStyles(colors);
-  return <Pressable onPress={onPress} style={({ pressed }) => [styles.row, pressed && { opacity: .75 }]}>{word.is_favorite && <BookmarkRibbon />}<View style={{ paddingRight: 18 }}><Text style={styles.word}>{word.word}</Text><Text numberOfLines={1} style={styles.meaning}>{word.part_of_speech || 'word'} · {word.meaning_short}</Text>{!!meta && <Text style={styles.meta}>{meta}</Text>}</View></Pressable>;
+  return <Pressable accessibilityRole="button" accessibilityLabel={`Open ${word.word}, ${word.meaning_short}`} onPress={onPress} style={({ pressed }) => [styles.row, pressed && { opacity: .75 }]}>{word.is_favorite && <BookmarkRibbon />}<View style={{ paddingRight: 18 }}><Text style={styles.word}>{word.word}</Text><Text numberOfLines={1} style={styles.meaning}>{word.part_of_speech || 'word'} · {word.meaning_short}</Text>{!!meta && <Text style={styles.meta}>{meta}</Text>}</View></Pressable>;
 }
 const createStyles = (colors: AppColors) => StyleSheet.create({
   row: { backgroundColor: colors.cardLight, borderBottomWidth: 1, borderColor: colors.border, paddingVertical: 10, paddingHorizontal: 12, overflow: 'hidden' },

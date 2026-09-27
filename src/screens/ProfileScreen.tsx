@@ -1,23 +1,31 @@
-import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { OwlMascot } from '../components/OwlMascot';
+import { PrimaryButton } from '../components/PrimaryButton';
 import { ResponsivePage } from '../components/ResponsivePage';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { ReviewSubmission } from '../models/ReviewSubmission';
 import { WordEntry } from '../models/WordEntry';
+import { clearAllReviewSubmissions, clearAllWords } from '../services/wordStorage';
+import { downloadOrShareLocalData, importLocalData, selectLocalDataBackup } from '../services/localDataTransfer';
 import { AppColors } from '../theme/colors';
 import { useTheme } from '../theme/ThemeContext';
 import { typography } from '../theme/typography';
 import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
 import { groupAlphabetically } from '../utils/groupWords';
+import { calculateCurrentStreak } from '../utils/reviewStats';
 
 type ProfileScreenProps = {
   words: WordEntry[];
+  reviewHistory: ReviewSubmission[];
   onBack?: () => void;
   onDictionary?: () => void;
+  onFavourites?: () => void;
   onReview?: () => void;
+  onDataChanged?: () => Promise<void>;
 };
 
-type StatAction = 'dictionary' | 'review';
+type StatAction = 'dictionary' | 'favourites' | 'review';
 
 type StatCard = {
   label: string;
@@ -28,39 +36,99 @@ type StatCard = {
   accessibilityLabel: string;
 };
 
-export function ProfileScreen({ words, onBack, onDictionary, onReview }: ProfileScreenProps) {
+export function ProfileScreen({ words, reviewHistory, onBack, onDictionary, onFavourites, onReview, onDataChanged }: ProfileScreenProps) {
   const { isTabletUp } = useResponsiveLayout();
   const { colors } = useTheme();
   const styles = createStyles(colors);
-  const demoMode = words.length <= 10 && words.some((word) => word.source === 'demo');
   const reviewed = words.reduce((n, w) => n + w.reviewed_count, 0);
   const favourites = words.filter((w) => w.is_favorite).length;
   const xp = words.length * 10 + reviewed * 5;
   const level = Math.max(1, Math.floor(xp / 150) + 1);
   const next = level * 150;
-  const display = demoMode
-    ? { total: 48, reviewed: 23, favourites: 12, level: 3, xp: 350, next: 500 }
-    : { total: words.length, reviewed, favourites, level, xp, next };
   const groups = groupAlphabetically(words);
-  const rows = demoMode
-    ? [['A', 12, 62], ['B', 5, 32], ['C', 9, 50], ['D', 2, 18]] as const
-    : Object.keys(groups).sort().slice(0, 8).map((letter) => [letter, groups[letter].length, Math.max(8, (groups[letter].length / Math.max(1, words.length)) * 100)] as const);
+  const reviewAttempts = reviewHistory.length;
+  const currentStreak = calculateCurrentStreak(reviewHistory);
+  const rows = Object.keys(groups).sort().slice(0, 8).map((letter) => [letter, groups[letter].length, Math.max(8, (groups[letter].length / Math.max(1, words.length)) * 100)] as const);
+  const [dataBusy, setDataBusy] = useState(false);
+  const [dataStatus, setDataStatus] = useState<string | null>(null);
 
   const mainStats: StatCard[] = [
-    { label: 'Total Words', value: display.total, color: colors.greenDark, hint: 'Browse dictionary', action: 'dictionary', accessibilityLabel: 'Open dictionary from total words' },
-    { label: 'Reviewed', value: display.reviewed, color: colors.greenDark, hint: 'Practice again', action: 'review', accessibilityLabel: 'Open review from reviewed words' },
-    { label: 'Favourites', value: display.favourites, color: colors.bookmark, hint: 'See saved words', action: 'dictionary', accessibilityLabel: 'Open dictionary from favourites' },
+    { label: 'Total Words', value: words.length, color: colors.greenDark, hint: 'Browse dictionary', action: 'dictionary', accessibilityLabel: 'Open dictionary from total words' },
+    { label: 'Reviewed', value: reviewed, color: colors.greenDark, hint: 'Practice again', action: 'review', accessibilityLabel: 'Open review from reviewed words' },
+    { label: 'Favourites', value: favourites, color: colors.bookmark, hint: 'See saved words', action: 'favourites', accessibilityLabel: 'Open favourite words' },
   ];
 
   const smallStats: StatCard[] = [
-    { label: 'Favourite Ratio', value: `${Math.round((display.favourites / Math.max(1, display.total)) * 100)}%`, hint: `${display.favourites} saved favourites`, action: 'dictionary', accessibilityLabel: 'Open dictionary from favourite ratio' },
-    { label: 'Review Attempts', value: display.reviewed, hint: 'Start a quiz', action: 'review', accessibilityLabel: 'Open review from attempts' },
-    { label: 'Current Streak', value: '7 days', hint: 'Keep growing', action: 'review', accessibilityLabel: 'Open review from streak' },
+    { label: 'Favourite Ratio', value: `${Math.round((favourites / Math.max(1, words.length)) * 100)}%`, hint: `${favourites} saved favourites`, action: 'favourites', accessibilityLabel: 'Open favourite words from favourite ratio' },
+    { label: 'Review Attempts', value: reviewAttempts, hint: 'Completed quizzes', action: 'review', accessibilityLabel: 'Open review history' },
+    { label: 'Current Streak', value: `${currentStreak} ${currentStreak === 1 ? 'day' : 'days'}`, hint: currentStreak ? 'Keep growing' : 'Complete a review to begin', action: 'review', accessibilityLabel: 'Open review from current streak' },
   ];
 
   function runAction(action: StatAction) {
     if (action === 'review') onReview?.();
+    else if (action === 'favourites') onFavourites?.();
     else onDictionary?.();
+  }
+
+  async function exportData() {
+    try {
+      setDataBusy(true);
+      setDataStatus(null);
+      await downloadOrShareLocalData();
+      setDataStatus('Your dictionary backup is ready.');
+    } catch {
+      setDataStatus('Could not export your data. Please try again.');
+    } finally {
+      setDataBusy(false);
+    }
+  }
+
+  async function importData() {
+    if (Platform.OS !== 'web') {
+      setDataStatus('Import is available in the web release.');
+      return;
+    }
+    try {
+      setDataBusy(true);
+      setDataStatus(null);
+      const payload = await selectLocalDataBackup();
+      if (!payload) return;
+      if (typeof window !== 'undefined' && !window.confirm('Import this backup and replace the current saved words and review history?')) return;
+      const result = await importLocalData(payload);
+      await onDataChanged?.();
+      setDataStatus(`Imported ${result.wordsImported} words and ${result.reviewsImported} review${result.reviewsImported === 1 ? '' : 's'}.`);
+    } catch (error) {
+      const message = error instanceof Error && error.message === 'IMPORT_UNSUPPORTED_FILE'
+        ? 'This backup was created by an unsupported app version.'
+        : 'That backup could not be imported. Choose a valid My Dictionary JSON backup.';
+      setDataStatus(message);
+    } finally {
+      setDataBusy(false);
+    }
+  }
+
+  async function clearData() {
+    const clear = async () => {
+      try {
+        setDataBusy(true);
+        setDataStatus(null);
+        await Promise.all([clearAllWords(), clearAllReviewSubmissions()]);
+        await onDataChanged?.();
+        setDataStatus('Saved words and review history were cleared.');
+      } catch {
+        setDataStatus('Could not clear your saved data. Please try again.');
+      } finally {
+        setDataBusy(false);
+      }
+    };
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      if (window.confirm('Clear all saved words and review history? This cannot be undone unless you exported a backup.')) await clear();
+      return;
+    }
+    Alert.alert('Clear saved data?', 'This removes all saved words and review history from this device.', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Clear data', style: 'destructive', onPress: clear },
+    ]);
   }
 
   return (
@@ -80,13 +148,13 @@ export function ProfileScreen({ words, onBack, onDictionary, onReview }: Profile
           <View style={styles.owlWrap}><OwlMascot size={isTabletUp ? 120 : 78} variant="search" /></View>
           <View style={styles.progressColumn}>
             <Text style={styles.collector}>Word Collector</Text>
-            <Text style={[styles.level, isTabletUp && styles.levelWide]}>Level {display.level}</Text>
+            <Text style={[styles.level, isTabletUp && styles.levelWide]}>Level {level}</Text>
             <View style={styles.progressLine}>
-              <View style={styles.progress}><View style={[styles.progressFill, { width: `${Math.min(100, (display.xp / display.next) * 100)}%` }]} /></View>
-              {isTabletUp && <Text style={styles.xpInline}>{display.xp} / {display.next} XP</Text>}
+              <View style={styles.progress}><View style={[styles.progressFill, { width: `${Math.min(100, (xp / next) * 100)}%` }]} /></View>
+              {isTabletUp && <Text style={styles.xpInline}>{xp} / {next} XP</Text>}
             </View>
           </View>
-          {!isTabletUp && <Text style={styles.xp}>{display.xp} / {display.next} XP</Text>}
+          {!isTabletUp && <Text style={styles.xp}>{xp} / {next} XP</Text>}
         </View>
 
         <View style={[styles.themeRow, isTabletUp && styles.themeRowWide]}><ThemeToggle /></View>
@@ -102,6 +170,17 @@ export function ProfileScreen({ words, onBack, onDictionary, onReview }: Profile
         <Text style={[styles.section, isTabletUp && styles.sectionWide]}>Words by alphabet</Text>
         <View style={[styles.alphaBox, isTabletUp && styles.alphaBoxWide]}>
           {rows.length ? rows.map(([letter, count, width]) => <View key={letter} style={[styles.alphaRow, isTabletUp && styles.alphaRowWide]}><Text style={styles.alphaLetter}>{letter}</Text><View style={styles.bar}><View style={[styles.barFill, { width: `${width}%` }]} /></View><Text style={styles.alphaCount}>{count}</Text></View>) : <Text style={styles.emptyText}>Save words to see your alphabet spread.</Text>}
+        </View>
+
+        <View style={[styles.dataCard, isTabletUp && styles.dataCardWide]}>
+          <Text style={[styles.dataTitle, isTabletUp && styles.sectionWide]}>Your local data</Text>
+          <Text style={styles.dataDescription}>Saved words and review history stay in this browser or device. Export a backup before clearing or moving your data.</Text>
+          <View style={styles.dataButtons}>
+            <PrimaryButton disabled={dataBusy} title={dataBusy ? 'Working…' : 'Export backup'} onPress={exportData} variant="ghost" />
+            <PrimaryButton disabled={dataBusy} title="Import backup" onPress={importData} variant="ghost" />
+            <PrimaryButton disabled={dataBusy} title="Clear saved data" onPress={clearData} variant="danger" />
+          </View>
+          {!!dataStatus && <Text accessibilityLiveRegion="polite" style={styles.dataStatus}>{dataStatus}</Text>}
         </View>
       </ResponsivePage>
     </ScrollView>
@@ -188,4 +267,10 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
   barFill: { height: '100%', backgroundColor: colors.green, borderRadius: 999 },
   alphaCount: { width: 24, color: colors.text, textAlign: 'right', fontWeight: '800', fontSize: 12 },
   emptyText: { color: colors.muted, fontSize: 13, lineHeight: 20 },
+  dataCard: { marginTop: 24, borderWidth: 1, borderColor: colors.border, borderRadius: 12, backgroundColor: colors.cardLight, padding: 16, gap: 10 },
+  dataCardWide: { borderRadius: 16, padding: 22, maxWidth: 760 },
+  dataTitle: { color: colors.text, fontFamily: typography.serif, fontSize: 20, fontWeight: '900' },
+  dataDescription: { color: colors.muted, fontSize: 12, lineHeight: 19 },
+  dataButtons: { gap: 8, alignItems: 'flex-start' },
+  dataStatus: { color: colors.greenDark, fontSize: 12, lineHeight: 18 },
 });

@@ -6,6 +6,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { spacing } from '../theme/spacing';
 import { typography } from '../theme/typography';
 import { SynonymChips } from './SynonymChips';
+import { SourceAttribution } from './SourceAttribution';
 
 export function WordDefinitionBlock({ word, full = false }: { word: WordEntry; full?: boolean }) {
   const { colors } = useTheme();
@@ -15,6 +16,7 @@ export function WordDefinitionBlock({ word, full = false }: { word: WordEntry; f
     <View><Text style={styles.label}>Meaning</Text>{defs.map((d, i) => <Text key={`${d.definition}-${i}`} style={styles.body}>{defs.length > 1 ? `${i + 1}. ` : ''}{d.definition}</Text>)}</View>
     <View><Text style={styles.label}>Example</Text><Text style={styles.example}>{word.example || 'No example available yet.'}</Text></View>
     {!!word.synonyms.length && <View><Text style={styles.label}>Synonyms</Text><SynonymChips words={word.synonyms} /></View>}
+    <SourceAttribution word={word} />
   </View>;
 }
 const createStyles = (colors: AppColors) => StyleSheet.create({

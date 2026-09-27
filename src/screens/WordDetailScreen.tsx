@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Linking, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { PrimaryButton } from '../components/PrimaryButton';
 import { ResponsivePage } from '../components/ResponsivePage';
 import { WordEntry } from '../models/WordEntry';
 import { saveSavedWordMeaning, toggleSavedWordFavourite } from '../modules/savedWordCollection';
@@ -8,26 +9,58 @@ import { useTheme } from '../theme/ThemeContext';
 import { typography } from '../theme/typography';
 import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
 import { formatDate } from '../utils/dateUtils';
+import { SourceAttribution } from '../components/SourceAttribution';
 
-export function WordDetailScreen({ word, onBack, onChanged, openNote }: { word: WordEntry; onBack: () => void; onChanged: (w: WordEntry) => void; openNote: (w: WordEntry) => void }) {
+export function WordDetailScreen({ word, onBack, onChanged, onDelete, openNote }: { word: WordEntry; onBack: () => void; onChanged: (w: WordEntry) => void; onDelete: () => Promise<void>; openNote: (w: WordEntry) => void }) {
   const { isTabletUp } = useResponsiveLayout();
   const { colors } = useTheme();
   const styles = createStyles(colors);
   const [myMeaning, setMyMeaning] = useState(word.my_meaning || '');
-  async function saveMeaning() { onChanged(await saveSavedWordMeaning(word, myMeaning)); }
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  async function saveMeaning() {
+    try {
+      setSaveError(null);
+      onChanged(await saveSavedWordMeaning(word, myMeaning));
+    } catch {
+      setSaveError('Could not save your meaning. Please try again.');
+    }
+  }
   async function toggleFavorite() { onChanged(await toggleSavedWordFavourite(word)); }
+  async function requestDelete() {
+    const remove = async () => {
+      try {
+        setDeleteError(null);
+        setDeleting(true);
+        await onDelete();
+      } catch {
+        setDeleteError('Could not remove this word. Please try again.');
+      } finally {
+        setDeleting(false);
+      }
+    };
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      if (window.confirm(`Remove “${word.word}” from your dictionary?`)) await remove();
+      return;
+    }
+    Alert.alert('Remove word?', `Remove “${word.word}” from your dictionary?`, [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Remove', style: 'destructive', onPress: remove },
+    ]);
+  }
   const defs = word.definitions.slice(0, 2);
   return (
     <ScrollView style={styles.screen} contentContainerStyle={[styles.content, isTabletUp && styles.contentWide]} showsVerticalScrollIndicator={false}>
       <ResponsivePage>
         <View style={styles.header}>
-          <Text onPress={onBack} style={styles.back}>‹</Text>
+          <Pressable accessibilityRole="button" accessibilityLabel="Back to dictionary" onPress={onBack} style={styles.backButton}><Text style={styles.back}>‹</Text></Pressable>
         </View>
-        {!isTabletUp && <Pressable onPress={toggleFavorite} style={styles.ribbonHit}><Text style={[styles.ribbon, !word.is_favorite && { opacity: 0.45 }]}>▾</Text></Pressable>}
+        {!isTabletUp && <Pressable accessibilityRole="button" accessibilityLabel={word.is_favorite ? 'Remove favourite' : 'Mark as favourite'} accessibilityState={{ selected: word.is_favorite }} onPress={toggleFavorite} style={styles.ribbonHit}><Text style={[styles.ribbon, !word.is_favorite && { opacity: 0.45 }]}>▾</Text></Pressable>}
         <View style={[styles.detailGrid, isTabletUp && styles.detailGridWide]}>
           <View style={styles.mainColumn}>
             <Text numberOfLines={1} adjustsFontSizeToFit style={[styles.title, isTabletUp && styles.titleWide]}>{word.word}</Text>
-            <View style={styles.soundRow}><Text style={styles.phonetic}>{word.phonetic || 'Pronunciation not available'}</Text>{word.audio_url ? <Text onPress={() => Linking.openURL(word.audio_url!)} style={styles.sound}>↯</Text> : <Text style={[styles.sound, { opacity: 0.35 }]}>↯</Text>}</View>
+            <View style={styles.soundRow}><Text style={styles.phonetic}>{word.phonetic || 'Pronunciation not available'}</Text>{word.audio_url ? <Pressable accessibilityRole="button" accessibilityLabel={`Play pronunciation for ${word.word}`} onPress={() => Linking.openURL(word.audio_url!)}><Text style={styles.sound}>↯</Text></Pressable> : <Text accessibilityLabel="Pronunciation unavailable" style={[styles.sound, { opacity: 0.35 }]}>↯</Text>}</View>
             {!!word.part_of_speech && <Text style={styles.pos}>{word.part_of_speech}</Text>}
             <View style={styles.entryBlock}>
               <Text style={styles.label}>Meaning</Text>
@@ -38,14 +71,18 @@ export function WordDetailScreen({ word, onBack, onChanged, openNote }: { word: 
               <Text style={styles.body}>{word.example || 'No example available yet.'}</Text>
             </View>
             {!!word.synonyms.length && <View style={styles.entryBlock}><Text style={styles.label}>Synonyms</Text><Text style={styles.syn}>{word.synonyms.slice(0, 5).join(' · ')}</Text></View>}
+            <SourceAttribution word={word} />
           </View>
           <View style={styles.sideColumn}>
             {isTabletUp && <Pressable accessibilityRole="button" accessibilityLabel="Toggle favourite word" onPress={toggleFavorite} style={styles.favoritePill}><Text style={styles.favoriteText}>{word.is_favorite ? '★ Favourite' : '☆ Mark favourite'}</Text></Pressable>}
             <View style={[styles.myCard, isTabletUp && styles.myCardWide]}>
               <View style={styles.rowBetween}><Text style={styles.label}>My meaning</Text><Pressable onPress={() => openNote(word)} accessibilityRole="button" accessibilityLabel="Edit my meaning"><Text style={styles.edit}>✎</Text></Pressable></View>
-              <TextInput multiline value={myMeaning} onChangeText={setMyMeaning} onBlur={saveMeaning} placeholder="Add your own simple meaning..." placeholderTextColor={colors.muted} style={styles.myInput} />
+              <TextInput accessibilityLabel={`Your meaning for ${word.word}`} multiline value={myMeaning} onChangeText={setMyMeaning} onBlur={saveMeaning} placeholder="Add your own simple meaning..." placeholderTextColor={colors.muted} style={styles.myInput} />
+              {!!saveError && <Text style={styles.error}>{saveError}</Text>}
             </View>
             <Text style={styles.meta}>Searched {word.search_count} times{`\n`}Added on {formatDate(word.created_at)}</Text>
+            <View style={styles.deleteWrap}><PrimaryButton title={deleting ? 'Removing…' : 'Remove from dictionary'} onPress={requestDelete} variant="danger" /></View>
+            {!!deleteError && <Text style={styles.error}>{deleteError}</Text>}
           </View>
         </View>
       </ResponsivePage>
@@ -57,7 +94,8 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
   content: { paddingHorizontal: 24, paddingTop: 14, paddingBottom: 42 },
   contentWide: { paddingHorizontal: 40, paddingTop: 28, paddingBottom: 54 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 18, marginBottom: 24 },
-  back: { flex: 1, color: colors.text, fontSize: 34, lineHeight: 38 },
+  backButton: { flex: 1, alignItems: 'flex-start' },
+  back: { color: colors.text, fontSize: 34, lineHeight: 38 },
   ribbonHit: { position: 'absolute', right: 24, top: 54, zIndex: 5 },
   ribbon: { color: colors.bookmark, fontSize: 42 },
   favoritePill: { alignSelf: 'flex-start', borderWidth: 1, borderColor: colors.border, backgroundColor: colors.cardLight, borderRadius: 999, paddingHorizontal: 14, paddingVertical: 9 },
@@ -82,4 +120,6 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
   edit: { color: colors.text, fontSize: 19 },
   myInput: { minHeight: 44, color: colors.text, fontSize: 13, lineHeight: 19, padding: 0 },
   meta: { marginTop: 10, color: colors.muted, fontSize: 11, lineHeight: 18 },
+  deleteWrap: { marginTop: 10 },
+  error: { color: colors.error, fontSize: 11, lineHeight: 17, marginTop: 6 },
 });

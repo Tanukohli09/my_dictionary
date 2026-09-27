@@ -6,7 +6,7 @@ import { useTheme } from '../theme/ThemeContext';
 export function BookmarkButton({ active, onPress }: { active: boolean; onPress: () => void }) {
   const { colors } = useTheme();
   const styles = createStyles(colors);
-  return <Pressable onPress={onPress} style={[styles.button, active && styles.active]}><Text style={styles.text}>{active ? '♥' : '♡'}</Text></Pressable>;
+  return <Pressable accessibilityRole="button" accessibilityLabel={active ? 'Remove favourite' : 'Mark as favourite'} accessibilityState={{ selected: active }} onPress={onPress} style={[styles.button, active && styles.active]}><Text style={styles.text}>{active ? '♥' : '♡'}</Text></Pressable>;
 }
 export function BookmarkRibbon() {
   const { colors } = useTheme();

@@ -29,7 +29,7 @@ export function emptyDictionaryTitle(sort: SortMode) {
 }
 
 function searchableWords(words: WordEntry[]) {
-  return words.filter((word) => !(word.source === 'demo' && word.word === 'Curious'));
+  return words;
 }
 
 function matchesQuery(word: WordEntry, query: string) {

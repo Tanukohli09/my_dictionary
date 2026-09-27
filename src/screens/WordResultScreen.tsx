@@ -1,5 +1,5 @@
 import React from 'react';
-import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { BookmarkButton } from '../components/BookmarkButton';
 import { ResponsivePage } from '../components/ResponsivePage';
 import { SavedStamp } from '../components/SavedStamp';
@@ -19,11 +19,11 @@ export function WordResultScreen({ word, created, onBack, onChanged }: { word: W
   return (
     <ScrollView style={styles.screen} contentContainerStyle={[styles.content, isTabletUp && styles.contentWide]} showsVerticalScrollIndicator={false}>
       <ResponsivePage>
-        <View style={styles.header}><Text onPress={onBack} style={styles.nav}>‹</Text><BookmarkButton active={word.is_favorite} onPress={toggleFavorite} /></View>
+        <View style={styles.header}><Pressable accessibilityRole="button" accessibilityLabel="Back to search" onPress={onBack} hitSlop={8}><Text style={styles.nav}>‹</Text></Pressable><BookmarkButton active={word.is_favorite} onPress={toggleFavorite} /></View>
         <View style={[styles.layout, isTabletUp && styles.layoutWide]}>
           <View style={[styles.page, isTabletUp && styles.pageWide]}>
             <Text style={[styles.title, isTabletUp && styles.titleWide]}>{word.word}</Text>
-            <View style={styles.soundRow}><Text style={styles.phonetic}>{word.phonetic || 'Pronunciation not available'}</Text>{word.audio_url ? <Text style={styles.speaker} onPress={() => Linking.openURL(word.audio_url!)}>↯</Text> : <Text style={[styles.speaker, { opacity: .35 }]}>↯</Text>}</View>
+            <View style={styles.soundRow}><Text style={styles.phonetic}>{word.phonetic || 'Pronunciation not available'}</Text>{word.audio_url ? <Pressable accessibilityRole="button" accessibilityLabel={`Play pronunciation for ${word.word}`} onPress={() => Linking.openURL(word.audio_url!)}><Text style={styles.speaker}>↯</Text></Pressable> : <Text accessibilityLabel="Pronunciation unavailable" style={[styles.speaker, { opacity: .35 }]}>↯</Text>}</View>
             {word.part_of_speech && <Text style={styles.pos}>{word.part_of_speech}</Text>}
             <WordDefinitionBlock word={word} />
           </View>

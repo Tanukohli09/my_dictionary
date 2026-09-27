@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ErrorState } from '../components/ErrorState';
 import { LoadingState } from '../components/LoadingState';
 import { OwlMascot } from '../components/OwlMascot';
 import { PaperCard } from '../components/PaperCard';
@@ -23,21 +24,36 @@ export function SearchScreen({ words, reload, openResult, openDetail, goDictiona
   const styles = createStyles(colors);
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const recent = [...words].sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 3);
   const wordOfDay = words.find((word) => word.word === 'Ephemeral') || sample;
 
   async function search() {
     const normalized = normalizeWord(query);
     if (!normalized) return Alert.alert('A tiny blank page', 'Type a word to search.');
+    setErrorMessage(null);
     setLoading(true);
     try {
       const saved = await searchSavedWord(normalized);
       await reload();
       openResult(saved.entry, saved.created);
       setQuery('');
-    } catch {
-      Alert.alert('Word not found', 'We could not find this word. Check the spelling and try again.');
+    } catch (error) {
+      if (error instanceof Error && error.message === 'NOT_FOUND') {
+        setErrorMessage('We could not find this word. Check the spelling and try again.');
+      } else if (error instanceof Error && error.message === 'LOOKUP_TIMEOUT') {
+        setErrorMessage('The dictionary is taking too long to respond. Check your connection and try again.');
+      } else if (error instanceof Error && error.message === 'RATE_LIMITED') {
+        setErrorMessage('Too many searches in a short time. Please wait a moment and try again.');
+      } else {
+        setErrorMessage('The dictionary service is temporarily unavailable. Check your connection and try again.');
+      }
     } finally { setLoading(false); }
+  }
+
+  function updateQuery(value: string) {
+    setQuery(value);
+    if (errorMessage) setErrorMessage(null);
   }
 
   return (
@@ -53,8 +69,9 @@ export function SearchScreen({ words, reload, openResult, openDetail, goDictiona
               </View>
               <View style={styles.heroOwl}><OwlMascot size={isTabletUp ? 132 : 88} variant="search" /></View>
             </View>
-            <SearchBar placeholder="Search a word..." value={query} onChangeText={setQuery} onSubmitEditing={search} autoCapitalize="none" />
+            <SearchBar placeholder="Search a word..." value={query} onChangeText={updateQuery} onSubmitEditing={search} autoCapitalize="none" />
             {loading && <LoadingState />}
+            {!loading && errorMessage && <ErrorState message={errorMessage} onRetry={search} />}
           </View>
           <View style={styles.sideColumn}>
             <PaperCard style={[styles.wotd, isTabletUp && styles.wotdWide]}>
@@ -63,8 +80,8 @@ export function SearchScreen({ words, reload, openResult, openDetail, goDictiona
               <Text style={styles.phonetic}>{wordOfDay.phonetic}</Text>
               <Text style={styles.meaning}>{wordOfDay.meaning_short}</Text>
             </PaperCard>
-            <View style={styles.recentHead}><Text style={styles.recentTitle}>Recently added</Text>{!!recent.length && <Text onPress={goDictionary} style={styles.seeAll}>See all</Text>}</View>
-            <View style={styles.rows}>{(recent.length ? recent : ['Resilient', 'Curious', 'Benevolent']).map((item) => typeof item === 'string' ? <Text key={item} style={styles.rowText}>{item}</Text> : <Text key={item.id} onPress={() => openDetail(item)} style={styles.rowText}>{item.word}</Text>)}</View>
+            <View style={styles.recentHead}><Text style={styles.recentTitle}>Recently added</Text>{!!recent.length && <Pressable accessibilityRole="button" accessibilityLabel="See all saved words" onPress={goDictionary}><Text style={styles.seeAll}>See all</Text></Pressable>}</View>
+            <View style={styles.rows}>{recent.length ? recent.map((item) => <Pressable key={item.id} accessibilityRole="button" accessibilityLabel={`Open ${item.word}`} onPress={() => openDetail(item)}><Text style={styles.rowText}>{item.word}</Text></Pressable>) : <Text style={styles.emptyRecent}>Search your first word to build your wordbook.</Text>}</View>
           </View>
         </View>
       </ResponsivePage>
@@ -100,4 +117,5 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
   seeAll: { color: colors.muted, fontSize: 12 },
   rows: { borderTopWidth: 1, borderColor: colors.border },
   rowText: { color: colors.text, paddingVertical: 10, borderBottomWidth: 1, borderColor: colors.border, fontSize: 14, fontWeight: '600' },
+  emptyRecent: { color: colors.muted, paddingVertical: 12, fontSize: 13, lineHeight: 19 },
 });

@@ -23,6 +23,7 @@ export function OnboardingScreen({ onStart }: { onStart: () => void }) {
             <Text style={styles.subtitle}>Your words, your world.</Text>
           </View>
           <Text style={[styles.body, isTabletUp && styles.bodyWide]}>Search any word. We’ll show the meaning and save it alphabetically in your personal wordbook.</Text>
+          <Text style={styles.note}>Your saved words stay on this browser or device. Searches use the dictionary service to find definitions.</Text>
           <PrimaryButton title="Start with your first word" onPress={onStart} />
         </View>
         <View style={[styles.owlStage, isTabletUp && styles.owlStageWide]}><OwlMascot size={isTabletUp ? 280 : 205} variant="hero" /></View>
@@ -45,6 +46,7 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
   owlStageWide: { width: 330, height: 320 },
   body: { color: colors.muted, textAlign: 'center', lineHeight: 23, fontSize: 14, marginBottom: 18 },
   bodyWide: { textAlign: 'left', fontSize: 17, lineHeight: 28, marginBottom: 24 },
+  note: { color: colors.faint, textAlign: 'center', lineHeight: 18, fontSize: 11, maxWidth: 380, marginBottom: 18 },
   spark: { position: 'absolute', color: colors.yellow, fontSize: 22 },
   sparkLeft: { top: 86, left: 48 },
   sparkRight: { top: 86, right: 58 },

@@ -7,7 +7,7 @@ export function SortOptionCard({ title, subtitle, icon, selected, onPress }: { t
   const { colors } = useTheme();
   const styles = createStyles(colors);
   return (
-    <Pressable onPress={onPress} style={styles.row}>
+    <Pressable accessibilityRole="button" accessibilityLabel={`${title}: ${subtitle}`} accessibilityState={{ selected }} onPress={onPress} style={styles.row}>
       <Text style={[styles.icon, title === 'Favourites' && styles.star]}>{icon}</Text>
       <View style={{ flex: 1 }}><Text style={styles.title}>{title}</Text><Text style={styles.subtitle}>{subtitle}</Text></View>
       <Text style={styles.check}>{selected ? '✓' : ''}</Text>

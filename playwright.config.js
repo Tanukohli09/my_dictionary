@@ -6,15 +6,15 @@ module.exports = defineConfig({
   timeout: 30_000,
   expect: { timeout: 8_000 },
   use: {
-    baseURL: 'http://localhost:8082',
+    baseURL: 'http://127.0.0.1:8082',
     channel: 'chrome',
     viewport: { width: 430, height: 920 },
     trace: 'retain-on-failure',
   },
   webServer: {
-    command: 'npx expo start --web --port 8082',
-    url: 'http://localhost:8082',
-    reuseExistingServer: true,
+    command: 'node scripts/start-e2e.js --port 8082',
+    url: 'http://127.0.0.1:8082',
+    reuseExistingServer: false,
     timeout: 120_000,
   },
 });

@@ -19,16 +19,16 @@ export function AppMenu({ visible, active, onClose, onNavigate }: { visible: boo
   if (!visible) return null;
   return (
     <View style={styles.overlay}>
-      <Pressable accessibilityLabel="Close navigation menu" onPress={onClose} style={StyleSheet.absoluteFill} />
+      <Pressable accessibilityRole="button" accessibilityLabel="Close navigation menu" onPress={onClose} style={StyleSheet.absoluteFill} />
       <View style={styles.sheet}>
         <View style={styles.header}>
           <Text style={styles.title}>Navigate</Text>
-          <Text onPress={onClose} style={styles.close}>×</Text>
+          <Pressable accessibilityRole="button" accessibilityLabel="Close navigation menu" onPress={onClose} hitSlop={8}><Text style={styles.close}>×</Text></Pressable>
         </View>
         {items.map((item) => {
           const selected = item.tab === active;
           return (
-            <Pressable key={item.tab} accessibilityRole="button" onPress={() => onNavigate(item.tab)} style={[styles.item, selected && styles.selected]}>
+            <Pressable key={item.tab} accessibilityRole="button" accessibilityLabel={`${item.title} menu item`} accessibilityState={{ selected }} onPress={() => onNavigate(item.tab)} style={[styles.item, selected && styles.selected]}>
               <Text style={styles.icon}>{item.icon}</Text>
               <View style={{ flex: 1 }}>
                 <Text style={styles.itemTitle}>{item.title}</Text>

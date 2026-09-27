@@ -1,0 +1,41 @@
+services:
+  - type: web
+    name: my-dictionary-staging
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DICTIONARY_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: PORT
+        value: "10000"
+      - key: DICTIONARY_WEB_ROOT
+        value: /app/dist
+      - key: EXPO_PUBLIC_DICTIONARY_API_URL
+        value: /api/dictionary
+      - key: DICTIONARY_ALLOWED_ORIGIN
+        sync: false
+      - key: DICTIONARY_PROVIDER_APPROVED
+        sync: false
+      - key: DICTIONARY_PROVIDER
+        value: datamuse
+      - key: DICTIONARY_UPSTREAM_URL
+        value: https://api.datamuse.com/words
+      - key: DICTIONARY_FALLBACK_PROVIDER
+        value: wiktionary
+      - key: DICTIONARY_FALLBACK_URL
+        value: https://en.wiktionary.org/api/rest_v1/page/definition
+      - key: DICTIONARY_ENABLE_WIKTIONARY_FALLBACK
+        value: "true"
+      - key: DICTIONARY_HEALTH_WORD
+        value: the
+      - key: DICTIONARY_HSTS
+        value: "true"
+      - key: DICTIONARY_METRICS_TOKEN
+        generateValue: true

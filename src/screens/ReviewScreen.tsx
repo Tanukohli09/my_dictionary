@@ -65,6 +65,7 @@ export function ReviewScreen({ words, reload, goSearch }: { words: WordEntry[]; 
         savedSessionIds.current.add(answered.session.id);
         await saveReviewSubmission(submission);
         await refreshHistory();
+        await reload();
       }
     }
   }
@@ -91,9 +92,9 @@ export function ReviewScreen({ words, reload, goSearch }: { words: WordEntry[]; 
               {question.options.map((option, i) => {
                 const chosen = shownSelected === i;
                 const correct = shownSelected !== null && i === question.correctIndex;
-                return <Pressable key={`${question.word.id}-${i}-${option}`} onPress={() => answer(i)} style={[styles.option, correct && styles.correct, chosen && !correct && styles.wrong]}><Text style={styles.optionText}>{String.fromCharCode(65 + i)})  {option}</Text><Text style={styles.mark}>{correct ? '✓' : chosen ? '×' : ''}</Text></Pressable>;
+                return <Pressable key={`${question.word.id}-${i}-${option}`} accessibilityRole="button" accessibilityLabel={`Choose answer ${String.fromCharCode(65 + i)}: ${option}`} accessibilityState={{ selected: chosen }} onPress={() => answer(i)} style={[styles.option, correct && styles.correct, chosen && !correct && styles.wrong]}><Text style={styles.optionText}>{String.fromCharCode(65 + i)})  {option}</Text><Text style={styles.mark}>{correct ? '✓' : chosen ? '×' : ''}</Text></Pressable>;
               })}
-              <View style={styles.footer}><Text style={styles.progress}>{Math.min(session!.currentIndex + 1, session!.totalQuestions)} / {session!.totalQuestions}</Text>{shownSelected !== null && <Pressable style={styles.next} onPress={() => setSession((current) => current ? advanceReviewSession(current) : current)}><Text style={styles.nextText}>Next</Text></Pressable>}</View>
+              <View style={styles.footer}><Text style={styles.progress}>{Math.min(session!.currentIndex + 1, session!.totalQuestions)} / {session!.totalQuestions}</Text>{shownSelected !== null && <Pressable accessibilityRole="button" accessibilityLabel="Next review question" style={styles.next} onPress={() => setSession((current) => current ? advanceReviewSession(current) : current)}><Text style={styles.nextText}>Next</Text></Pressable>}</View>
             </View>
           ) : null}
           <ReviewHistoryList history={history} styles={styles} isTabletUp={isTabletUp} />

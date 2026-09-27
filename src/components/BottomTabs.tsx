@@ -11,7 +11,7 @@ export function BottomTabs({ active, onChange }: { active: TabName; onChange: (t
   const { colors } = useTheme();
   const styles = createStyles(colors);
   const tabs: TabName[] = ['Search', 'Dictionary', 'Review', 'Profile'];
-  return <View style={styles.bar}>{tabs.map((tab) => <Pressable key={tab} onPress={() => onChange(tab)} style={styles.item}><View style={[styles.iconWrap, active === tab && styles.activeWrap]}><Text style={styles.icon}>{icons[tab]}</Text></View><Text style={[styles.label, active === tab && styles.activeText]}>{tab}</Text></Pressable>)}</View>;
+  return <View style={styles.bar}>{tabs.map((tab) => <Pressable key={tab} accessibilityRole="button" accessibilityLabel={`${tab} tab`} accessibilityState={{ selected: active === tab }} onPress={() => onChange(tab)} style={styles.item}><View style={[styles.iconWrap, active === tab && styles.activeWrap]}><Text style={styles.icon}>{icons[tab]}</Text></View><Text style={[styles.label, active === tab && styles.activeText]}>{tab}</Text></Pressable>)}</View>;
 }
 const createStyles = (colors: AppColors) => StyleSheet.create({
   bar: { flexDirection: 'row', backgroundColor: colors.cardLight, borderTopWidth: 1, borderColor: colors.border, paddingVertical: 8, paddingHorizontal: 13 },

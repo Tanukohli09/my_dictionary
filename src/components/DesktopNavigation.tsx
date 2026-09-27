@@ -28,7 +28,7 @@ export function DesktopNavigation({ active, onChange }: { active: TabName; onCha
         {items.map((item) => {
           const selected = item.tab === active;
           return (
-            <Pressable key={item.tab} accessibilityRole="button" onPress={() => onChange(item.tab)} style={[styles.item, selected && styles.selected]}>
+            <Pressable key={item.tab} accessibilityRole="button" accessibilityLabel={`${item.title} navigation`} accessibilityState={{ selected }} onPress={() => onChange(item.tab)} style={[styles.item, selected && styles.selected]}>
               <Text style={styles.icon}>{item.icon}</Text>
               <View style={{ flex: 1 }}>
                 <Text style={[styles.title, selected && styles.selectedText]}>{item.title}</Text>
