@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-28
 **Phase:** 5 of the production-readiness plan
-**Status:** Implementation complete; staging redeploy and owner review remain
+**Status:** Implementation and staging deployment complete; owner review remains
 
 ## What this phase delivered
 
@@ -52,6 +52,8 @@ Passed after the Phase 5 changes:
 
 The release smoke build and server checks confirm that the runtime image change does not alter the API contract, health checks, CORS policy, request IDs, or provider fallback behavior.
 
+The verified commit is `2c04f8f` (`Harden launch privacy support and CI`). Render auto-deployed it to [my-dictionary-staging.onrender.com](https://my-dictionary-staging.onrender.com) and reported the service live. The public `/health`, `/ready`, and `/api/dictionary/owl` endpoints returned successfully, and the live Privacy and Support routes were checked at `/?screen=privacy` and `/?screen=support`.
+
 ## Remaining launch gates
 
 - [ ] Review and approve the privacy/support wording for the actual owner and jurisdiction.
@@ -61,6 +63,6 @@ The release smoke build and server checks confirm that the runtime image change 
 - [ ] Complete a dependency upgrade plan for Expo 57 and re-run all native/web tests.
 - [ ] Run a small beta test on real mobile and desktop devices.
 - [ ] Decide whether to attach a custom domain; Render-managed HTTPS works for staging.
-- [ ] Confirm Render auto-deploy behavior for future `main` commits.
+- [x] Confirm Render auto-deploy behavior for future `main` commits.
 
-Phase 5 implementation is complete. The next phase should be the dependency/platform upgrade and final beta launch review, not an untested forced audit fix.
+Phase 5 implementation and staging deployment are complete. The next phase should be the dependency/platform upgrade and final beta launch review, not an untested forced audit fix.
