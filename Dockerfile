@@ -15,8 +15,6 @@ ENV NODE_ENV=production \
     DICTIONARY_WEB_ROOT=/app/dist
 
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci --omit=dev && npm cache clean --force
 COPY --from=build /app/dist ./dist
 COPY server ./server
 

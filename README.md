@@ -100,6 +100,12 @@ The smoke check verifies `/health`, `/ready`, the exported web security headers,
 
 Never put `DICTIONARY_API_KEY` or other provider secrets in an `EXPO_PUBLIC_*` variable: Expo embeds those values in the client bundle.
 
+## Privacy and support
+
+The app includes privacy and support links before onboarding and from the Profile screen. The repository versions are available in [`PRIVACY.md`](PRIVACY.md) and [`SUPPORT.md`](SUPPORT.md). Review both with the owner's legal and support requirements before a public launch.
+
+The GitHub Actions quality workflow runs type checking, phase verification, server hardening tests, and the release smoke contract on pushes and pull requests. It also uploads an npm audit report. The current Expo 54 dependency graph still contains known build-chain advisories that require a separately tested Expo major upgrade; the workflow keeps that report visible without applying a breaking upgrade automatically.
+
 ## Available Scripts
 
 ```bash
@@ -167,6 +173,12 @@ npm run test:release
 ```
 
 Run the deterministic release smoke contract locally against mock providers.
+
+```bash
+npm run test:server
+```
+
+Run the production configuration, CORS, metrics, health, readiness, and provider-fallback checks.
 
 ## Project Structure
 

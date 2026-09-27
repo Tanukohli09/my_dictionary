@@ -8,6 +8,7 @@ import { ErrorState } from '../components/ErrorState';
 import { PhoneFrame } from '../components/PhoneFrame';
 import { WordEntry } from '../models/WordEntry';
 import { DictionaryScreen } from '../screens/DictionaryScreen';
+import { InfoScreen } from '../screens/InfoScreen';
 import { NoteScreen } from '../screens/NoteScreen';
 import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
@@ -74,11 +75,15 @@ export function AppNavigator() {
     if (screen) nextUrl.searchParams.set('screen', screen);
     else nextUrl.searchParams.delete('screen');
     window.history.replaceState(null, '', `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`);
-  }, [ready, nav.route.name, nav.tab]);
+  }, [ready, nav.route.name, nav.route.name === 'info' ? nav.route.kind : null, nav.tab]);
 
   if (!ready) return <PhoneFrame><View style={{ flex: 1, backgroundColor: colors.background }} /></PhoneFrame>;
   if (storageError) return <PhoneFrame><View style={{ flex: 1, justifyContent: 'center', backgroundColor: colors.page }}><ErrorState message={storageError} onRetry={reload} retryLabel="Retry loading data" /></View></PhoneFrame>;
-  if (!onboarded) return <PhoneFrame><OnboardingScreen onStart={async () => { await setOnboarded(); setOnboardedState(true); }} /></PhoneFrame>;
+  if (!onboarded) {
+    return <PhoneFrame>{nav.route.name === 'info'
+      ? <InfoScreen kind={nav.route.kind} onBack={() => dispatch({ type: 'backToTabs' })} />
+      : <OnboardingScreen onStart={async () => { await setOnboarded(); setOnboardedState(true); }} onPrivacy={() => dispatch({ type: 'openInfo', kind: 'privacy' })} onSupport={() => dispatch({ type: 'openInfo', kind: 'support' })} />}</PhoneFrame>;
+  }
 
   function currentWord(word: WordEntry) { return words.find((entry) => entry.id === word.id) || word; }
   const goTabs = () => { reload(); dispatch({ type: 'backToTabs' }); };
@@ -86,7 +91,9 @@ export function AppNavigator() {
   const onDeleted = async (word: WordEntry) => { await removeSavedWord(word); await reload(); dispatch({ type: 'backToTabs' }); };
 
   let content: React.ReactNode;
-  if (nav.route.name === 'result') {
+  if (nav.route.name === 'info') {
+    content = <InfoScreen kind={nav.route.kind} onBack={() => dispatch({ type: 'backToTabs' })} />;
+  } else if (nav.route.name === 'result') {
     const route = nav.route;
     content = <WordResultScreen word={currentWord(route.word)} created={route.created} onBack={goTabs} onChanged={onChanged} />;
   } else if (nav.route.name === 'detail') {
@@ -105,7 +112,7 @@ export function AppNavigator() {
         ? <DictionaryScreen words={words} openDetail={(word) => dispatch({ type: 'openDetail', word: currentWord(word) })} goSearch={() => dispatch({ type: 'openTab', tab: 'Search' })} sort={nav.dictionarySort} onSortOpen={() => dispatch({ type: 'openSort' })} onMenu={isTabletUp ? undefined : () => dispatch({ type: 'openMenu' })} />
         : nav.tab === 'Review'
           ? <ReviewScreen words={words} reload={reload} goSearch={() => dispatch({ type: 'openTab', tab: 'Search' })} />
-          : <ProfileScreen words={words} reviewHistory={reviewHistory} onBack={() => dispatch({ type: 'openTab', tab: 'Search' })} onDictionary={() => dispatch({ type: 'openTab', tab: 'Dictionary' })} onFavourites={() => { dispatch({ type: 'selectSort', sort: 'favourites' }); dispatch({ type: 'openTab', tab: 'Dictionary' }); }} onReview={() => dispatch({ type: 'openTab', tab: 'Review' })} onDataChanged={reload} />;
+          : <ProfileScreen words={words} reviewHistory={reviewHistory} onBack={() => dispatch({ type: 'openTab', tab: 'Search' })} onDictionary={() => dispatch({ type: 'openTab', tab: 'Dictionary' })} onFavourites={() => { dispatch({ type: 'selectSort', sort: 'favourites' }); dispatch({ type: 'openTab', tab: 'Dictionary' }); }} onReview={() => dispatch({ type: 'openTab', tab: 'Review' })} onPrivacy={() => dispatch({ type: 'openInfo', kind: 'privacy' })} onSupport={() => dispatch({ type: 'openInfo', kind: 'support' })} onDataChanged={reload} />;
   }
 
   return (

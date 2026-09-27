@@ -22,6 +22,8 @@ type ProfileScreenProps = {
   onDictionary?: () => void;
   onFavourites?: () => void;
   onReview?: () => void;
+  onPrivacy?: () => void;
+  onSupport?: () => void;
   onDataChanged?: () => Promise<void>;
 };
 
@@ -36,7 +38,7 @@ type StatCard = {
   accessibilityLabel: string;
 };
 
-export function ProfileScreen({ words, reviewHistory, onBack, onDictionary, onFavourites, onReview, onDataChanged }: ProfileScreenProps) {
+export function ProfileScreen({ words, reviewHistory, onBack, onDictionary, onFavourites, onReview, onPrivacy, onSupport, onDataChanged }: ProfileScreenProps) {
   const { isTabletUp } = useResponsiveLayout();
   const { colors } = useTheme();
   const styles = createStyles(colors);
@@ -182,6 +184,15 @@ export function ProfileScreen({ words, reviewHistory, onBack, onDictionary, onFa
           </View>
           {!!dataStatus && <Text accessibilityLiveRegion="polite" style={styles.dataStatus}>{dataStatus}</Text>}
         </View>
+
+        <View style={[styles.infoCard, isTabletUp && styles.dataCardWide]}>
+          <Text style={[styles.dataTitle, isTabletUp && styles.sectionWide]}>Privacy & support</Text>
+          <Text style={styles.dataDescription}>Learn how local storage and dictionary lookups work, or report a problem without sharing private notes or backup files.</Text>
+          <View style={styles.dataButtons}>
+            <PrimaryButton title="Read privacy notice" onPress={() => onPrivacy?.()} variant="ghost" />
+            <PrimaryButton title="Get support" onPress={() => onSupport?.()} variant="ghost" />
+          </View>
+        </View>
       </ResponsivePage>
     </ScrollView>
   );
@@ -268,6 +279,7 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
   alphaCount: { width: 24, color: colors.text, textAlign: 'right', fontWeight: '800', fontSize: 12 },
   emptyText: { color: colors.muted, fontSize: 13, lineHeight: 20 },
   dataCard: { marginTop: 24, borderWidth: 1, borderColor: colors.border, borderRadius: 12, backgroundColor: colors.cardLight, padding: 16, gap: 10 },
+  infoCard: { marginTop: 14, borderWidth: 1, borderColor: colors.border, borderRadius: 12, backgroundColor: colors.cardLight, padding: 16, gap: 10 },
   dataCardWide: { borderRadius: 16, padding: 22, maxWidth: 760 },
   dataTitle: { color: colors.text, fontFamily: typography.serif, fontSize: 20, fontWeight: '900' },
   dataDescription: { color: colors.muted, fontSize: 12, lineHeight: 19 },

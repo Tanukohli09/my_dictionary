@@ -2,12 +2,15 @@ import { Platform } from 'react-native';
 import { TabName } from '../components/BottomTabs';
 import { SortMode, WordEntry } from '../models/WordEntry';
 
+export type InfoKind = 'privacy' | 'support';
+
 export type AppRoute =
   | { name: 'tabs' }
   | { name: 'result'; word: WordEntry; created: boolean }
   | { name: 'detail'; word: WordEntry }
   | { name: 'note'; word: WordEntry }
-  | { name: 'sort' };
+  | { name: 'sort' }
+  | { name: 'info'; kind: InfoKind };
 
 export type AppNavigationState = {
   tab: TabName;
@@ -24,6 +27,7 @@ export type AppNavigationAction =
   | { type: 'openDetail'; word: WordEntry }
   | { type: 'openNote'; word: WordEntry }
   | { type: 'openSort' }
+  | { type: 'openInfo'; kind: InfoKind }
   | { type: 'selectSort'; sort: SortMode }
   | { type: 'backToTabs' }
   | { type: 'backToDetail'; word: WordEntry }
@@ -36,20 +40,26 @@ export function requestedScreenFromUrl() {
 }
 
 export function initialNavigationState(screen = requestedScreenFromUrl()): AppNavigationState {
+  const infoKind = infoKindForScreen(screen);
   return {
     tab: tabForRequestedScreen(screen),
-    route: screen === 'sort' ? { name: 'sort' } : { name: 'tabs' },
+    route: infoKind ? { name: 'info', kind: infoKind } : screen === 'sort' ? { name: 'sort' } : { name: 'tabs' },
     dictionarySort: 'alphabetical',
     menuOpen: false,
   };
 }
 
 export function hydrateRouteFromUrl(state: AppNavigationState, screen: string | null, focus?: WordEntry): AppNavigationState {
-  if (!focus) return screen === 'sort' ? { ...state, route: { name: 'sort' } } : state;
+  const infoKind = infoKindForScreen(screen);
+  if (!focus) {
+    if (infoKind) return { ...state, route: { name: 'info', kind: infoKind } };
+    return screen === 'sort' ? { ...state, route: { name: 'sort' } } : state;
+  }
   if (screen === 'result') return { ...state, route: { name: 'result', word: focus, created: true } };
   if (screen === 'detail') return { ...state, route: { name: 'detail', word: focus } };
   if (screen === 'note') return { ...state, route: { name: 'note', word: focus } };
   if (screen === 'sort') return { ...state, route: { name: 'sort' } };
+  if (infoKind) return { ...state, route: { name: 'info', kind: infoKind } };
   return state;
 }
 
@@ -69,6 +79,8 @@ export function navigationFlowReducer(state: AppNavigationState, action: AppNavi
       return { ...state, route: { name: 'note', word: action.word }, menuOpen: false };
     case 'openSort':
       return { ...state, route: { name: 'sort' }, menuOpen: false };
+    case 'openInfo':
+      return { ...state, route: { name: 'info', kind: action.kind }, menuOpen: false };
     case 'selectSort':
       return { ...state, dictionarySort: action.sort };
     case 'backToTabs':
@@ -83,7 +95,9 @@ export function navigationFlowReducer(state: AppNavigationState, action: AppNavi
 }
 
 export function projectedScreen(state: AppNavigationState) {
-  return state.route.name === 'tabs' ? (state.tab === 'Search' ? null : state.tab.toLowerCase()) : state.route.name;
+  if (state.route.name === 'tabs') return state.tab === 'Search' ? null : state.tab.toLowerCase();
+  if (state.route.name === 'info') return state.route.kind;
+  return state.route.name;
 }
 
 export function shouldShowBottomTabs(state: AppNavigationState) {
@@ -95,6 +109,10 @@ function tabForRequestedScreen(screen: string | null): TabName {
   if (screen === 'review') return 'Review';
   if (screen === 'profile') return 'Profile';
   return 'Search';
+}
+
+function infoKindForScreen(screen: string | null): InfoKind | null {
+  return screen === 'privacy' || screen === 'support' ? screen : null;
 }
 
 function replaceRouteWord(state: AppNavigationState, word: WordEntry): AppNavigationState {

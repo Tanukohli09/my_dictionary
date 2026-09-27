@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { OwlMascot } from '../components/OwlMascot';
 import { PrimaryButton } from '../components/PrimaryButton';
@@ -8,7 +8,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { typography } from '../theme/typography';
 import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
 
-export function OnboardingScreen({ onStart }: { onStart: () => void }) {
+export function OnboardingScreen({ onStart, onPrivacy, onSupport }: { onStart: () => void; onPrivacy: () => void; onSupport: () => void }) {
   const { isTabletUp } = useResponsiveLayout();
   const { colors } = useTheme();
   const styles = createStyles(colors);
@@ -25,6 +25,11 @@ export function OnboardingScreen({ onStart }: { onStart: () => void }) {
           <Text style={[styles.body, isTabletUp && styles.bodyWide]}>Search any word. We’ll show the meaning and save it alphabetically in your personal wordbook.</Text>
           <Text style={styles.note}>Your saved words stay on this browser or device. Searches use the dictionary service to find definitions.</Text>
           <PrimaryButton title="Start with your first word" onPress={onStart} />
+          <View style={styles.footerLinks}>
+            <Pressable accessibilityRole="link" accessibilityLabel="Read the privacy notice" onPress={onPrivacy}><Text style={styles.footerLink}>Privacy</Text></Pressable>
+            <Text style={styles.footerSeparator}>·</Text>
+            <Pressable accessibilityRole="link" accessibilityLabel="Open support information" onPress={onSupport}><Text style={styles.footerLink}>Support</Text></Pressable>
+          </View>
         </View>
         <View style={[styles.owlStage, isTabletUp && styles.owlStageWide]}><OwlMascot size={isTabletUp ? 280 : 205} variant="hero" /></View>
       </View>
@@ -47,6 +52,9 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
   body: { color: colors.muted, textAlign: 'center', lineHeight: 23, fontSize: 14, marginBottom: 18 },
   bodyWide: { textAlign: 'left', fontSize: 17, lineHeight: 28, marginBottom: 24 },
   note: { color: colors.faint, textAlign: 'center', lineHeight: 18, fontSize: 11, maxWidth: 380, marginBottom: 18 },
+  footerLinks: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 14 },
+  footerLink: { color: colors.greenDark, fontSize: 12, fontWeight: '800' },
+  footerSeparator: { color: colors.faint, fontSize: 12 },
   spark: { position: 'absolute', color: colors.yellow, fontSize: 22 },
   sparkLeft: { top: 86, left: 48 },
   sparkRight: { top: 86, right: 58 },
