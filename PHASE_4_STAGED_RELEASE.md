@@ -1,8 +1,8 @@
 # Phase 4 — Staged Release and Launch Preparation
 
-**Date:** 2026-09-27
+**Date:** 2026-09-28
 **Phase:** 4 of the production-readiness plan
-**Status:** Local launch preparation complete; external staging deployment is still pending
+**Status:** Staging service deployed and verified on Render; production launch gates remain
 
 ## What this phase delivered
 
@@ -52,7 +52,9 @@ Updated [`README.md`](README.md) with:
 
 Added [`render.yaml`](render.yaml), a Render Blueprint for a Free-plan staging web service. It uses the Dockerfile, binds Render’s expected port `10000`, configures `/health`, and keeps the allowed origin and provider approval as dashboard-supplied values rather than committing them to source control.
 
-The Render Blueprint was parsed successfully locally. The Render Dashboard is open and waiting for account sign-in; no service has been created yet.
+The Render Blueprint was parsed successfully locally and deployed as a Render Free-plan staging service. The service is available at [my-dictionary-staging.onrender.com](https://my-dictionary-staging.onrender.com) from commit `cbe35cf`.
+
+The live service is configured with Datamuse as the approved primary provider and Wiktionary as the fallback. Render built the Docker image, started the server on port `10000`, and passed the `/health` check.
 
 ## Verification completed
 
@@ -68,21 +70,18 @@ Passed:
 
 The local release smoke output verified `/health`, `/ready`, HTML security headers, CORS, request IDs, and a successful dictionary response through the isolated proxy.
 
+The live Render smoke checks also passed:
+
+- `GET /health` returned `200` with `ok: true`.
+- `GET /ready` returned `200` with a successful Datamuse provider check.
+- `GET /api/dictionary/owl` returned `200` with real meanings and `x-dictionary-provider: datamuse`.
+- The deployed browser flow completed onboarding, searched for `owl`, displayed its definition, and added it to the dictionary.
+
 ## What could not be completed locally
 
-The Docker build was attempted but the environment denied access to `/var/run/docker.sock`. The Dockerfile is present and syntax-reviewed, but an actual image build still needs to run on a machine or CI runner with Docker access.
+The local environment denied access to `/var/run/docker.sock`, so the Docker image could not be built locally. Render successfully built and deployed the same Dockerfile.
 
-No real staging deployment was created because the project does not yet specify:
-
-- a hosting provider or deployment target;
-- a staging domain and DNS/TLS ownership;
-- the approved dictionary provider and fallback policy;
-- production/staging provider credentials;
-- an external metrics, uptime, or alert destination.
-
-The Render setup flow is now ready, but the dashboard requires the owner to sign in and connect the repository before it can create the service.
-
-These require user-owned accounts or deployment authority and cannot be safely inferred.
+The staging service uses Render's managed HTTPS URL. A custom production domain, external monitoring destination, beta testers, and public privacy/support links are still not configured.
 
 ## Staging runbook
 
@@ -123,15 +122,15 @@ When a host is selected:
 - [x] Local release contract passes.
 - [x] Container deployment artifact exists.
 - [x] Render Blueprint exists and uses the expected web-service port/health check.
+- [x] Render built the Docker image and deployed the staging service.
 - [x] Runtime secrets remain external to the image.
-- [ ] Docker image build verified on a Docker-capable CI/host.
-- [ ] Real staging host and domain selected.
-- [ ] HTTPS/DNS configured.
-- [ ] Provider and fallback policy approved.
-- [ ] Staging provider credentials configured.
+- [x] Real staging host and Render-managed HTTPS URL selected.
+- [x] HTTPS/DNS configured for the Render-managed URL.
+- [x] Provider and fallback policy approved.
+- [x] Staging provider configuration verified with a real lookup.
 - [ ] External monitoring and alerting configured.
 - [ ] Dependency audit completed in networked CI.
 - [ ] Beta tester sign-off received.
 - [ ] Privacy/support links published.
 
-Phase 4 local implementation is complete, but public launch is not yet approved. The next action is external deployment setup, not more application feature work.
+Phase 4 staging deployment is complete. Public launch still requires monitoring, dependency-audit results, beta tester sign-off, and published privacy/support links.
