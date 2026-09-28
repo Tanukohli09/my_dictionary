@@ -23,7 +23,8 @@
     "test:server": "node scripts/test-server-hardening.js",
     "test:phase3": "node scripts/test-phase3.js",
     "test:release": "npm run build:web && node scripts/test-release-smoke.js",
-    "release:smoke": "node scripts/release-smoke.js"
+    "release:smoke": "node scripts/release-smoke.js",
+    "beta:smoke": "node scripts/beta-smoke.js"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",

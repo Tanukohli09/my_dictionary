@@ -98,11 +98,22 @@ npm run release:smoke
 
 The smoke check verifies `/health`, `/ready`, the exported web security headers, one real dictionary lookup, exact-origin CORS, and request IDs. Keep `.env.staging` outside source control.
 
+For a controlled beta validation against a deployed service, run the read-only beta smoke contract with representative real words and a known not-found case:
+
+    BETA_BASE_URL=https://staging.example.com \
+    BETA_WEB_ORIGIN=https://staging.example.com \
+    BETA_EXPECTED_PROVIDER=datamuse \
+    npm run beta:smoke
+
+The beta smoke contract checks provider readiness, the web security headers, exact-origin CORS and preflight behavior, several real lookups, and a deterministic not-found response. It does not modify saved user data or require a metrics token. See [BETA_RUNBOOK.md](BETA_RUNBOOK.md) for the invite, monitoring, and rollback checklist.
+
 Never put `DICTIONARY_API_KEY` or other provider secrets in an `EXPO_PUBLIC_*` variable: Expo embeds those values in the client bundle.
 
 ## Privacy and support
 
 The app includes privacy and support links before onboarding and from the Profile screen. The repository versions are available in [`PRIVACY.md`](PRIVACY.md) and [`SUPPORT.md`](SUPPORT.md). Review both with the owner's legal and support requirements before a public launch.
+
+Security reports must follow [SECURITY.md](SECURITY.md); do not put secrets or exploit details in public issues.
 
 The GitHub Actions quality workflow runs Expo compatibility checks, type checking, core behavior checks, server hardening tests, and the release smoke contract on pushes and pull requests. It also uploads an npm audit report. The current Expo 57 production dependency graph reports 11 moderate Expo build-tool advisories and no high or critical findings in the current audit; do not use a forced audit fix because it proposes an unsupported major downgrade.
 

@@ -15,3 +15,5 @@ Include your browser and device, the word that failed, the approximate time, the
 Open the [My Dictionary issue tracker](https://github.com/Tanukohli09/my_dictionary/issues). Search existing issues first, then provide the smallest reproducible description.
 
 For security reports, do not publish an exploit or secret in a public issue. The repository owner should enable a private GitHub security reporting channel before a broad public launch.
+
+See the repository [security policy](SECURITY.md) for the safe reporting process.

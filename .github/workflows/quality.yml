@@ -31,6 +31,9 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Check beta smoke script
+        run: node --check scripts/beta-smoke.js
+
       - name: Run Phase 1 verification
         run: npm run test:phase1
 
