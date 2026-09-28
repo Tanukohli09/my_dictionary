@@ -20,7 +20,7 @@ A cross-platform dictionary and vocabulary learning app built with Expo, React N
 
 ## Tech Stack
 
-- [Expo](https://expo.dev/)
+- [Expo SDK 57](https://expo.dev/sdk/57)
 - [React Native](https://reactnative.dev/)
 - [React](https://react.dev/)
 - [TypeScript](https://www.typescriptlang.org/)
@@ -104,7 +104,7 @@ Never put `DICTIONARY_API_KEY` or other provider secrets in an `EXPO_PUBLIC_*` v
 
 The app includes privacy and support links before onboarding and from the Profile screen. The repository versions are available in [`PRIVACY.md`](PRIVACY.md) and [`SUPPORT.md`](SUPPORT.md). Review both with the owner's legal and support requirements before a public launch.
 
-The GitHub Actions quality workflow runs type checking, phase verification, server hardening tests, and the release smoke contract on pushes and pull requests. It also uploads an npm audit report. The current Expo 54 dependency graph still contains known build-chain advisories that require a separately tested Expo major upgrade; the workflow keeps that report visible without applying a breaking upgrade automatically.
+The GitHub Actions quality workflow runs Expo compatibility checks, type checking, core behavior checks, server hardening tests, and the release smoke contract on pushes and pull requests. It also uploads an npm audit report. The current Expo 57 production dependency graph reports 11 moderate Expo build-tool advisories and no high or critical findings in the current audit; do not use a forced audit fix because it proposes an unsupported major downgrade.
 
 ## Available Scripts
 

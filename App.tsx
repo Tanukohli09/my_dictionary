@@ -19,7 +19,7 @@ function AppContent() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar style={isNightMode ? 'light' : 'dark'} backgroundColor={colors.page} />
+      <StatusBar style={isNightMode ? 'light' : 'dark'} />
       <AppNavigator />
     </SafeAreaProvider>
   );

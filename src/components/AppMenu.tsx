@@ -45,7 +45,7 @@ export function AppMenu({ visible, active, onClose, onNavigate }: { visible: boo
 }
 
 const createStyles = (colors: AppColors) => StyleSheet.create({
-  overlay: { ...StyleSheet.absoluteFillObject, zIndex: 90, justifyContent: 'flex-end', backgroundColor: 'rgba(58, 32, 17, 0.10)' },
+  overlay: { ...StyleSheet.absoluteFill, zIndex: 90, justifyContent: 'flex-end', backgroundColor: 'rgba(58, 32, 17, 0.10)' },
   sheet: { marginHorizontal: 18, marginBottom: 18, borderWidth: 1, borderColor: colors.border, borderRadius: 18, backgroundColor: colors.cardLight, padding: 14, shadowColor: colors.shadow, shadowOpacity: 0.22, shadowRadius: 18, shadowOffset: { width: 0, height: 8 } },
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
   title: { flex: 1, fontFamily: typography.serif, color: colors.text, fontSize: 21, fontWeight: '800' },

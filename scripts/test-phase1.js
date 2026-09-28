@@ -7,7 +7,7 @@ const storage = new Map();
 const originalLoad = Module._load;
 Module._load = function patchedLoad(request, parent, isMain) {
   if (request === '@react-native-async-storage/async-storage') {
-    return { default: {
+    return { __esModule: true, default: {
       async getItem(key) { return storage.has(key) ? storage.get(key) : null; },
       async setItem(key, value) { storage.set(key, value); },
       async removeItem(key) { storage.delete(key); },

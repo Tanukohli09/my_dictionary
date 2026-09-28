@@ -5,14 +5,30 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
-    "splash": { "backgroundColor": "#FFF8E7" },
-    "assetBundlePatterns": ["**/*"],
-    "ios": { "supportsTablet": true },
-    "android": { "adaptiveIcon": { "backgroundColor": "#FFF8E7" } },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#FFF8E7"
+      }
+    },
     "web": {
       "bundler": "metro",
       "name": "My Dictionary",
       "description": "A local-first dictionary and vocabulary learning app."
-    }
+    },
+    "plugins": [
+      "expo-status-bar",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FFF8E7"
+        }
+      ]
+    ]
   }
 }

@@ -25,11 +25,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Check Expo compatibility
+        run: npx expo-doctor
+
       - name: Typecheck
         run: npm run typecheck
 
-      - name: Run phase verification
+      - name: Run Phase 1 verification
+        run: npm run test:phase1
+
+      - name: Run Phase 3 verification
         run: npm run test:phase3
+
+      - name: Run review verification
+        run: npm run test:review
+
+      - name: Run mascot verification
+        run: npm run test:owl
 
       - name: Build web bundle
         run: npm run build:web
