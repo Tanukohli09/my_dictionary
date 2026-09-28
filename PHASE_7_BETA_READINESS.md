@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-29
 **Phase:** 7 of the production-readiness plan
-**Status:** Implementation complete; final Phase 7 deployment verification remains
+**Status:** Implementation, staging deployment, and live beta verification complete; owner gates remain
 
 ## Scope
 
@@ -57,11 +57,11 @@ Passed in the isolated Phase 7 candidate:
 - npm run test:server;
 - npm run test:release;
 - npm run test:e2e — 16 tests passed;
-- beta:smoke against the live staging service baseline.
+- beta:smoke against deployed Render commit 8c0d202.
 
 The restricted sandbox initially denied temporary localhost listeners during the server test. The same test passed when rerun with host networking, confirming an environment restriction rather than an application failure.
 
-The baseline live beta smoke passed against https://my-dictionary-staging.onrender.com for owl, apply, sesquipedalian, and a deterministic zzzzzzzzzz not-found response. The live browser also showed the Privacy route, Support route, and a real apply lookup with a Datamuse definition.
+The final live beta smoke passed against https://my-dictionary-staging.onrender.com at commit 8c0d202 for owl, apply, sesquipedalian, and a deterministic zzzzzzzzzz not-found response. The live browser also showed the Privacy route, Support route, and a real apply lookup with a Datamuse definition.
 
 ## Owner-controlled launch gates
 
@@ -79,4 +79,4 @@ These items require an owner account, an external service, a legal/product decis
 
 Use the existing Render URL for a small invite-only web beta only after the owner reviews the gates above. Record tester findings using the runbook, keep the metrics token private, and stop inviting users if readiness, lookup success, or data-loss reports degrade.
 
-Phase 7 implementation is complete. The remaining work is owner-controlled beta approval and external operations setup; no Phase 8 should begin until those gates are accepted or explicitly deferred.
+Phase 7 implementation, staging deployment, and live beta verification are complete. The remaining work is owner-controlled beta approval and external operations setup; no Phase 8 should begin until those gates are accepted or explicitly deferred.
