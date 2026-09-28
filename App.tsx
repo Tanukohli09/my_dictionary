@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Platform } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppNavigator } from './src/navigation/AppNavigator';
+import { AppErrorBoundary } from './src/components/AppErrorBoundary';
 import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
 
 function AppContent() {
@@ -28,7 +29,9 @@ function AppContent() {
 export default function App() {
   return (
     <ThemeProvider>
-      <AppContent />
+      <AppErrorBoundary>
+        <AppContent />
+      </AppErrorBoundary>
     </ThemeProvider>
   );
 }

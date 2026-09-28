@@ -40,6 +40,9 @@ jobs:
       - name: Run Phase 3 verification
         run: npm run test:phase3
 
+      - name: Run Phase 8 resilience checks
+        run: npm run test:phase8
+
       - name: Run review verification
         run: npm run test:review
 

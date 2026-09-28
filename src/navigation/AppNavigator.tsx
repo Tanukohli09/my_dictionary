@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useReducer, useState } from 'react';
+import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { Platform, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppMenu } from '../components/AppMenu';
@@ -22,7 +22,8 @@ import { ReviewSubmission } from '../models/ReviewSubmission';
 import { hasOnboarded, setOnboarded } from '../services/wordStorage';
 import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
 import { useTheme } from '../theme/ThemeContext';
-import { initialNavigationState, navigationFlowReducer, projectedScreen, requestedScreenFromUrl, shouldShowBottomTabs } from './navigationFlow';
+import { initialNavigationState, navigationFlowReducer, projectedScreen, requestedScreenFromUrl, requestedWordFromUrl, shouldShowBottomTabs } from './navigationFlow';
+import { normalizeWord } from '../utils/normalizeWord';
 
 export function AppNavigator() {
   const { isTabletUp } = useResponsiveLayout();
@@ -33,6 +34,13 @@ export function AppNavigator() {
   const [reviewHistory, setReviewHistory] = useState<ReviewSubmission[]>([]);
   const [storageError, setStorageError] = useState<string | null>(null);
   const [nav, dispatch] = useReducer(navigationFlowReducer, undefined, () => initialNavigationState());
+  const historyUrlRef = useRef<string | null>(null);
+  const findRequestedWord = useCallback((entries: WordEntry[]) => {
+    const requestedWord = requestedWordFromUrl();
+    if (!requestedWord) return undefined;
+    const normalized = normalizeWord(requestedWord);
+    return entries.find((word) => word.normalized_word === normalized);
+  }, []);
   const loadLocalData = useCallback(async () => {
     const [loadedWords, loadedHistory] = await Promise.all([loadSavedWords(), loadReviewSubmissions()]);
     setWords(loadedWords);
@@ -57,7 +65,7 @@ export function AppNavigator() {
         setOnboardedState(didOnboard);
         setWords(loaded);
         setReviewHistory(loadedHistory);
-        const focus = loaded.find((word) => word.normalized_word === 'resilient') || loaded[0];
+        const focus = findRequestedWord(loaded) || loaded.find((word) => word.normalized_word === 'resilient') || loaded[0];
         dispatch({ type: 'hydrateFromUrl', screen: requestedScreenFromUrl(), focus });
       } catch {
         if (mounted) setStorageError('We could not load your saved dictionary. Your data has not been changed.');
@@ -66,7 +74,7 @@ export function AppNavigator() {
       }
     })();
     return () => { mounted = false; };
-  }, []);
+  }, [findRequestedWord]);
 
   useEffect(() => {
     if (!ready || Platform.OS !== 'web' || typeof window === 'undefined') return;
@@ -74,8 +82,29 @@ export function AppNavigator() {
     const nextUrl = new URL(window.location.href);
     if (screen) nextUrl.searchParams.set('screen', screen);
     else nextUrl.searchParams.delete('screen');
-    window.history.replaceState(null, '', `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`);
-  }, [ready, nav.route.name, nav.route.name === 'info' ? nav.route.kind : null, nav.tab]);
+    const routeWord = nav.route.name === 'result' || nav.route.name === 'detail' || nav.route.name === 'note'
+      ? nav.route.word.normalized_word
+      : null;
+    if (routeWord) nextUrl.searchParams.set('word', routeWord);
+    else nextUrl.searchParams.delete('word');
+    const nextLocation = nextUrl.pathname + nextUrl.search + nextUrl.hash;
+    const currentLocation = window.location.pathname + window.location.search + window.location.hash;
+    if (historyUrlRef.current === null) historyUrlRef.current = currentLocation;
+    if (nextLocation !== historyUrlRef.current) {
+      window.history.pushState(null, '', nextLocation);
+      historyUrlRef.current = nextLocation;
+    }
+  }, [ready, nav]);
+
+  useEffect(() => {
+    if (!ready || Platform.OS !== 'web' || typeof window === 'undefined') return;
+    const onPopState = () => {
+      historyUrlRef.current = window.location.pathname + window.location.search + window.location.hash;
+      dispatch({ type: 'hydrateFromUrl', screen: requestedScreenFromUrl(), focus: findRequestedWord(words) });
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, [findRequestedWord, ready, words]);
 
   if (!ready) return <PhoneFrame><View style={{ flex: 1, backgroundColor: colors.background }} /></PhoneFrame>;
   if (storageError) return <PhoneFrame><View style={{ flex: 1, justifyContent: 'center', backgroundColor: colors.page }}><ErrorState message={storageError} onRetry={reload} retryLabel="Retry loading data" /></View></PhoneFrame>;

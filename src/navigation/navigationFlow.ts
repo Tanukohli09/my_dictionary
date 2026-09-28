@@ -39,6 +39,11 @@ export function requestedScreenFromUrl() {
   return new URLSearchParams(window.location.search).get('screen');
 }
 
+export function requestedWordFromUrl() {
+  if (Platform.OS !== 'web' || typeof window === 'undefined') return null;
+  return new URLSearchParams(window.location.search).get('word');
+}
+
 export function initialNavigationState(screen = requestedScreenFromUrl()): AppNavigationState {
   const infoKind = infoKindForScreen(screen);
   return {
@@ -51,16 +56,20 @@ export function initialNavigationState(screen = requestedScreenFromUrl()): AppNa
 
 export function hydrateRouteFromUrl(state: AppNavigationState, screen: string | null, focus?: WordEntry): AppNavigationState {
   const infoKind = infoKindForScreen(screen);
+  const requestedTab = tabForRequestedScreen(screen);
+  const baseState = { ...state, tab: requestedTab, menuOpen: false };
   if (!focus) {
-    if (infoKind) return { ...state, route: { name: 'info', kind: infoKind } };
-    return screen === 'sort' ? { ...state, route: { name: 'sort' } } : state;
+    if (infoKind) return { ...baseState, route: { name: 'info', kind: infoKind } };
+    return screen === 'sort'
+      ? { ...baseState, route: { name: 'sort' } }
+      : { ...baseState, route: { name: 'tabs' } };
   }
-  if (screen === 'result') return { ...state, route: { name: 'result', word: focus, created: true } };
-  if (screen === 'detail') return { ...state, route: { name: 'detail', word: focus } };
-  if (screen === 'note') return { ...state, route: { name: 'note', word: focus } };
-  if (screen === 'sort') return { ...state, route: { name: 'sort' } };
-  if (infoKind) return { ...state, route: { name: 'info', kind: infoKind } };
-  return state;
+  if (screen === 'result') return { ...baseState, route: { name: 'result', word: focus, created: true } };
+  if (screen === 'detail') return { ...baseState, route: { name: 'detail', word: focus } };
+  if (screen === 'note') return { ...baseState, route: { name: 'note', word: focus } };
+  if (screen === 'sort') return { ...baseState, route: { name: 'sort' } };
+  if (infoKind) return { ...baseState, route: { name: 'info', kind: infoKind } };
+  return { ...baseState, route: { name: 'tabs' } };
 }
 
 export function navigationFlowReducer(state: AppNavigationState, action: AppNavigationAction): AppNavigationState {

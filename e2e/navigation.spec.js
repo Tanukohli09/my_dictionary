@@ -23,3 +23,23 @@ test('primary navigation, sorting, detail, and back flow', async ({ page }) => {
   await page.getByRole('button', { name: 'Back to dictionary' }).click();
   await expect(page.getByPlaceholder('Search your words...')).toBeVisible();
 });
+
+test('saved word URLs survive browser Back, Forward, and refresh', async ({ page }) => {
+  await page.goto('/?screen=dictionary', { waitUntil: 'networkidle' });
+
+  await page.getByRole('button', { name: /Open Resilient/ }).click();
+  await expect(page).toHaveURL(/screen=detail.*word=resilient/);
+  await expect(page.getByText('My meaning')).toBeVisible();
+
+  await page.goBack();
+  await expect(page).toHaveURL(/screen=dictionary/);
+  await expect(page.getByPlaceholder('Search your words...')).toBeVisible();
+
+  await page.goForward();
+  await expect(page).toHaveURL(/screen=detail.*word=resilient/);
+  await expect(page.getByText('My meaning')).toBeVisible();
+
+  await page.reload({ waitUntil: 'networkidle' });
+  await expect(page).toHaveURL(/screen=detail.*word=resilient/);
+  await expect(page.getByText('My meaning')).toBeVisible();
+});
