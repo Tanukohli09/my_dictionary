@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-29
 **Phase:** 6 of the production-readiness plan
-**Status:** Implementation complete; staging redeploy and beta owner review remain
+**Status:** Implementation and staging deployment complete; beta owner review remains
 
 ## What this phase delivered
 
@@ -55,6 +55,12 @@ Passed against the isolated SDK 57 candidate:
 
 The audit findings are in Expo's build/configuration toolchain and `uuid` transitive dependencies. npm's suggested automatic fix is not an appropriate release action because it proposes a major framework change; the dependency graph should be revisited during the next planned Expo upgrade.
 
+The Phase 6 implementation commit is 0856025 (Upgrade Expo platform and add beta review). Render auto-deployed it to [my-dictionary-staging.onrender.com](https://my-dictionary-staging.onrender.com), and the live deployment reported the commit as successful. Final public checks passed:
+
+- /health — ok, Datamuse provider selected, Wiktionary fallback configured;
+- /ready — ok, Datamuse provider check returned HTTP 200;
+- /api/dictionary/owl — returned noun and verb meanings.
+
 ## Beta launch gates still requiring owner action
 
 - [ ] Review and approve the privacy, support, and provider-attribution wording.
@@ -70,4 +76,4 @@ The audit findings are in Expo's build/configuration toolchain and `uuid` transi
 
 Proceed with a small invite-only web beta on the existing staging URL after the owner reviews the gates above. Keep the release web-first and local-first. Do not advertise native store availability or promise multi-device synchronization until the identifiers, native builds, accounts, monitoring, and data model are intentionally configured.
 
-Phase 6 implementation is complete. The next step is staging redeployment and owner beta approval; no further phase should begin until the beta gates are accepted or explicitly deferred.
+Phase 6 implementation and staging deployment are complete. The next step is owner beta approval; no further phase should begin until the beta gates are accepted or explicitly deferred.
