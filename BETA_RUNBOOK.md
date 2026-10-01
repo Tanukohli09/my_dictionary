@@ -71,7 +71,6 @@ Never paste provider secrets or the metrics token into issues, chat, screenshots
 ## Owner gates still outside the repository
 
 - legal and provider wording approval;
-- GitHub private vulnerability reporting enablement;
 - an external uptime monitor and alert destination;
 - real desktop, mobile, keyboard-only, and screen-reader checks;
 - a decision about a custom domain;

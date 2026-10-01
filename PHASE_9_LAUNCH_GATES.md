@@ -2,7 +2,7 @@
 
 Date: 2026-10-01
 
-Status: Repository-side launch work complete. One account-level security setting still requires action-time confirmation.
+Status: Phase complete. The repository-side monitor and GitHub security gate are enabled; the remaining items are optional or owner-review launch decisions.
 
 ## What this phase delivered
 
@@ -53,13 +53,12 @@ During the first direct check, Render returned a transient 503 while the free se
 
 ## Remaining launch gates
 
-1. GitHub private vulnerability reporting is still disabled. The repository security page currently shows Enable private vulnerability reporting. Enabling it changes the repository security configuration and needs owner confirmation immediately before the click.
-2. The GitHub Actions monitor is a free baseline, not an SLA-grade uptime service. A dedicated uptime provider and alert destination remain recommended before high-traffic or business-critical use.
-3. The protected /metrics endpoint still needs an operator-owned token-handling and alerting procedure.
-4. Real-device acceptance remains: mobile browser, desktop browser, keyboard-only navigation, screen reader basics, slow network, and a fresh browser profile.
-5. Privacy, provider attribution, and support wording still need final owner/legal approval.
-6. A custom domain remains optional and requires DNS configuration.
-7. Native identifiers and store work remain out of scope unless native distribution is approved.
+1. The GitHub Actions monitor is a free baseline, not an SLA-grade uptime service. A dedicated uptime provider and alert destination remain recommended before high-traffic or business-critical use.
+2. The protected /metrics endpoint still needs an operator-owned token-handling and alerting procedure.
+3. Real-device acceptance remains: mobile browser, desktop browser, keyboard-only navigation, screen reader basics, slow network, and a fresh browser profile.
+4. Privacy, provider attribution, and support wording still need final owner/legal approval.
+5. A custom domain remains optional and requires DNS configuration.
+6. Native identifiers and store work remain out of scope unless native distribution is approved.
 
 ## Published change
 
@@ -69,4 +68,4 @@ During the first direct check, Render returned a transient 503 while the free se
 
 ## Decision point
 
-The free repository-side monitoring gate is complete. Before this phase can be fully closed, confirm whether to enable GitHub private vulnerability reporting. No further phase will be started until that confirmation is received.
+Phase 9 is complete. Stop here until the owner confirms whether to begin the next phase.
