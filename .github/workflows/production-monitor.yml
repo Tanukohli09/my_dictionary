@@ -1,0 +1,34 @@
+name: Hosted service monitor
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hosted-service-monitor
+  cancel-in-progress: true
+
+jobs:
+  beta-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out monitoring contract
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run hosted service smoke contract with cold-start retry
+        env:
+          BETA_BASE_URL: https://my-dictionary-staging.onrender.com
+          BETA_API_BASE_URL: https://my-dictionary-staging.onrender.com
+          BETA_WEB_ORIGIN: https://my-dictionary-staging.onrender.com
+          BETA_EXPECTED_PROVIDER: datamuse
+        run: npm run monitor:smoke

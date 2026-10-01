@@ -22,7 +22,7 @@ The beta is not a native-store release, an account-sync release, or an unrestric
 6. Confirm not-found and retry messages are understandable.
 7. Confirm Privacy and Support are reachable before onboarding and from Profile.
 8. Confirm the owner has reviewed the provider attribution and privacy wording.
-9. Confirm an uptime monitor is watching /health and /ready, if monitoring has been configured.
+9. Confirm the GitHub Actions hosted-service monitor has a successful run. It runs the read-only beta smoke contract every 15 minutes against the hosted staging URL and retries possible Render cold starts.
 
 ## What the smoke contract checks
 
@@ -52,6 +52,8 @@ Do not ask testers to upload private notes or backup files to public issues.
 ## Monitoring and incident response
 
 - Use /health for process uptime and /ready for provider readiness.
+- The repository's GitHub Actions hosted-service monitor runs the beta smoke contract every 15 minutes, retries three times for possible Render cold starts, and can be started manually from the Actions tab.
+- This free monitor is a baseline safety net, not an SLA-grade uptime guarantee. Add a dedicated monitor and alert destination before a high-traffic or business-critical launch.
 - Keep the /metrics token server-side and access /metrics only from a protected operator environment.
 - Treat repeated readiness failures, elevated lookup latency, 5xx responses, or rate-limit reports as launch-blocking until understood.
 - Use the Support page for normal product reports and the Security Policy for suspected vulnerabilities.

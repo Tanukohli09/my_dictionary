@@ -23,6 +23,8 @@
     "test:server": "node scripts/test-server-hardening.js",
     "test:phase3": "node scripts/test-phase3.js",
     "test:phase8": "node scripts/test-phase8.js",
+    "test:phase9": "node scripts/test-phase9.js",
+    "monitor:smoke": "node scripts/hosted-monitor.js",
     "test:release": "npm run build:web && node scripts/test-release-smoke.js",
     "release:smoke": "node scripts/release-smoke.js",
     "beta:smoke": "node scripts/beta-smoke.js"

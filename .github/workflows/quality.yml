@@ -43,6 +43,9 @@ jobs:
       - name: Run Phase 8 resilience checks
         run: npm run test:phase8
 
+      - name: Run Phase 9 launch-gate checks
+        run: npm run test:phase9
+
       - name: Run review verification
         run: npm run test:review
 

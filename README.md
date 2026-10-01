@@ -107,6 +107,8 @@ For a controlled beta validation against a deployed service, run the read-only b
 
 The beta smoke contract checks provider readiness, the web security headers, exact-origin CORS and preflight behavior, several real lookups, and a deterministic not-found response. It does not modify saved user data or require a metrics token. See [BETA_RUNBOOK.md](BETA_RUNBOOK.md) for the invite, monitoring, and rollback checklist.
 
+The repository also includes [production-monitor.yml](.github/workflows/production-monitor.yml). GitHub Actions runs the same read-only beta smoke contract every 15 minutes, retries possible Render cold starts, and supports a manual run from the Actions tab. This is a free baseline monitor for the hosted staging service; it is not an SLA-grade replacement for a dedicated uptime provider.
+
 Never put `DICTIONARY_API_KEY` or other provider secrets in an `EXPO_PUBLIC_*` variable: Expo embeds those values in the client bundle.
 
 ## Privacy and support
