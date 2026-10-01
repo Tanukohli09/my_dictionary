@@ -46,6 +46,9 @@ jobs:
       - name: Run Phase 9 launch-gate checks
         run: npm run test:phase9
 
+      - name: Run Phase 10 final acceptance checks
+        run: npm run test:phase10
+
       - name: Run review verification
         run: npm run test:review
 

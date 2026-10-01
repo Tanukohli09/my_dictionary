@@ -4,7 +4,7 @@
 
 Do not publish exploit details, credentials, private notes, backup files, or provider secrets in a public GitHub issue.
 
-Before a broad public launch, the repository owner should enable GitHub private vulnerability reporting. Once it is enabled, use the repository Security tab and the private vulnerability reporting form to submit a report.
+GitHub private vulnerability reporting is enabled for this repository. Use the repository Security tab and the private vulnerability reporting form to submit a report.
 
 If private reporting is not available, contact the repository owner through a private channel and provide only the minimum information needed to reproduce the issue. Do not use a public issue for an active vulnerability.
 
