@@ -25,6 +25,7 @@
     "test:phase8": "node scripts/test-phase8.js",
     "test:phase9": "node scripts/test-phase9.js",
     "test:phase10": "node scripts/test-phase10.js",
+    "test:phase11": "node scripts/test-phase11.js",
     "monitor:smoke": "node scripts/hosted-monitor.js",
     "test:release": "npm run build:web && node scripts/test-release-smoke.js",
     "release:smoke": "node scripts/release-smoke.js",

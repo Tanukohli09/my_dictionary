@@ -49,6 +49,9 @@ jobs:
       - name: Run Phase 10 final acceptance checks
         run: npm run test:phase10
 
+      - name: Run Phase 11 controlled beta checks
+        run: npm run test:phase11
+
       - name: Run review verification
         run: npm run test:review
 

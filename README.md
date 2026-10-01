@@ -109,6 +109,8 @@ The beta smoke contract checks provider readiness, the web security headers, exa
 
 The repository also includes [production-monitor.yml](.github/workflows/production-monitor.yml). GitHub Actions runs the same read-only beta smoke contract every 15 minutes, retries possible Render cold starts, and supports a manual run from the Actions tab. This is a free baseline monitor for the hosted staging service; it is not an SLA-grade replacement for a dedicated uptime provider.
 
+The invite-only beta checklist and privacy-safe tester instructions are in [CONTROLLED_BETA.md](CONTROLLED_BETA.md). Do not share the beta broadly until the owner has completed the remaining manual and legal sign-offs.
+
 Never put `DICTIONARY_API_KEY` or other provider secrets in an `EXPO_PUBLIC_*` variable: Expo embeds those values in the client bundle.
 
 ## Privacy and support
