@@ -4,6 +4,9 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
+ARG EXPO_PUBLIC_SUPABASE_URL
+ARG EXPO_PUBLIC_SUPABASE_ANON_KEY
+ARG EXPO_PUBLIC_GOOGLE_AUTH_ENABLED=false
 RUN npm run build:web
 
 FROM node:22-bookworm-slim AS runtime
