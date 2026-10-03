@@ -22,6 +22,7 @@ export function SearchScreen({ words, reload, openResult, openDetail, goDictiona
   const styles = createStyles(colors);
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
+  const [slowLookup, setSlowLookup] = useState(false);
   const searching = useRef(false);
   const mounted = useRef(true);
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
@@ -37,8 +38,12 @@ export function SearchScreen({ words, reload, openResult, openDetail, goDictiona
     const normalized = normalizeWord(query);
     if (!normalized) return Alert.alert('A tiny blank page', 'Type a word to search.');
     setErrorMessage(null);
+    setSlowLookup(false);
     searching.current = true;
     setLoading(true);
+    const slowLookupTimer = setTimeout(() => {
+      if (mounted.current) setSlowLookup(true);
+    }, 10_000);
     try {
       const saved = await searchSavedWord(normalized);
       await reload();
@@ -56,7 +61,14 @@ export function SearchScreen({ words, reload, openResult, openDetail, goDictiona
       } else {
         setErrorMessage('The dictionary service is temporarily unavailable. Check your connection and try again.');
       }
-    } finally { searching.current = false; if (mounted.current) setLoading(false); }
+    } finally {
+      clearTimeout(slowLookupTimer);
+      searching.current = false;
+      if (mounted.current) {
+        setLoading(false);
+        setSlowLookup(false);
+      }
+    }
   }
 
   function updateQuery(value: string) {
@@ -78,7 +90,7 @@ export function SearchScreen({ words, reload, openResult, openDetail, goDictiona
               <View style={styles.heroOwl}><OwlMascot size={isTabletUp ? 132 : 88} variant="search" /></View>
             </View>
             <SearchBar placeholder="Search a word..." accessibilityHint="Type a word and press Search to look up its meaning." value={query} onChangeText={updateQuery} onSubmitEditing={search} autoCapitalize="none" />
-            {loading && <LoadingState />}
+            {loading && <LoadingState text={slowLookup ? 'The dictionary service is waking up. Keep this page open; the first search after inactivity can take up to a minute.' : undefined} />}
             {!loading && errorMessage && <ErrorState message={errorMessage} onRetry={search} />}
           </View>
           <View style={styles.sideColumn}>

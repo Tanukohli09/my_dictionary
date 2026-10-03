@@ -28,7 +28,8 @@ assert.ok(easJson.submit.production);
 
 assert.match(accountSpec, /Local-first account access/);
 assert.match(accountSpec, /Continue with Google/);
-assert.match(accountSpec, /EXPO_PUBLIC_SUPABASE_URL/);
+assert.match(accountSpec, /googleSignIn\.isVisible\(\)/);
+assert.match(accountSpec, /Save your progress with Google/);
 assert.match(phaseDoc, /two-account isolation/i);
 assert.match(phaseDoc, /npx eas build --platform android --profile preview/);
 assert.match(phaseDoc, /npx eas build --platform android --profile production/);

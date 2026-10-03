@@ -8,12 +8,16 @@ const configuredApi = typeof process !== 'undefined'
   ? process.env.EXPO_PUBLIC_DICTIONARY_API_URL?.replace(/\/$/, '')
   : undefined;
 const isProductionBuild = typeof process !== 'undefined' && process.env.NODE_ENV === 'production';
+const usesHostedDictionaryApi = Boolean(configuredApi) || (Platform.OS === 'web' && isProductionBuild);
 const API = configuredApi || (
   Platform.OS === 'web'
     ? (isProductionBuild ? '/api/dictionary' : 'http://127.0.0.1:3001/api/dictionary')
     : PUBLIC_API
 );
-const REQUEST_TIMEOUT_MS = 10_000;
+// Render free services can take about a minute to wake after idling. Keep the
+// request alive long enough for that cold start; direct provider/dev lookups
+// still use the shorter timeout.
+const REQUEST_TIMEOUT_MS = usesHostedDictionaryApi ? 75_000 : 10_000;
 const OFFLINE_FALLBACK_DELAY_MS = 1_500;
 const offlineFallbackEnabled = typeof process !== 'undefined' && (
   process.env.EXPO_PUBLIC_OFFLINE_FALLBACK === 'true' || process.env.NODE_ENV === 'development'

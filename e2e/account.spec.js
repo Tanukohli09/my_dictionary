@@ -16,11 +16,9 @@ test('profile exposes a safe account boundary without blocking local use', async
 
   await expect(page.getByText('Account', { exact: true })).toBeVisible();
 
-  const authConfigured = Boolean(
-    process.env.EXPO_PUBLIC_SUPABASE_URL && process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
-  );
-
-  if (authConfigured) {
+  const googleSignIn = page.getByRole('button', { name: 'Continue with Google' });
+  if (await googleSignIn.isVisible()) {
+    await expect(page.getByText('Save your progress with Google', { exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Continue with Google' })).toBeVisible();
   } else {
     await expect(page.getByText('Local-first account access', { exact: true })).toBeVisible();

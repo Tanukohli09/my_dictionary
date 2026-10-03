@@ -54,3 +54,27 @@ test('retry recovers from a transient provider failure', async ({ page }) => {
   await expect(page.getByText('Retryword', { exact: true })).toBeVisible();
   await expect(page.getByText('A test definition for retryword.', { exact: true })).toBeVisible();
 });
+
+test('keeps a slow hosted lookup alive and explains a cold start', async ({ page }) => {
+  await page.route('**/api/dictionary/wakeuptestword', async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 10_500));
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      headers: { 'x-dictionary-provider': 'dictionaryapi' },
+      body: JSON.stringify([{
+        word: 'wakeuptestword',
+        meanings: [{
+          partOfSpeech: 'noun',
+          definitions: [{ definition: 'A definition returned after a simulated service wake-up.' }],
+        }],
+      }]),
+    });
+  });
+
+  await search(page, 'wakeuptestword');
+
+  await expect(page.getByText(/service is waking up/i)).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText('Wakeuptestword', { exact: true })).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText('A definition returned after a simulated service wake-up.', { exact: true })).toBeVisible();
+});
