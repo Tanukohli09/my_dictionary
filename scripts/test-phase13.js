@@ -8,6 +8,7 @@ function read(file) {
 const packageJson = JSON.parse(read('package.json'));
 const appJson = JSON.parse(read('app.json'));
 const authService = read('src/services/auth.ts');
+const dockerfile = read('Dockerfile');
 const authContext = read('src/context/AuthContext.tsx');
 const accountCard = read('src/components/AccountCard.tsx');
 const privacy = read('PRIVACY.md');
@@ -25,6 +26,7 @@ assert.match(authService, /exchangeCodeForSession/);
 assert.match(authService, /SecureStore/);
 assert.match(authService, /EXPO_PUBLIC_GOOGLE_AUTH_ENABLED === 'true'/);
 assert.match(authService, /GOOGLE_AUTH_ENABLED && SUPABASE_URL && SUPABASE_ANON_KEY/);
+assert.equal((dockerfile.match(/FROM node:22-bookworm-slim/g) || []).length, 2);
 assert.match(authContext, /onAuthStateChange/);
 assert.match(authContext, /startAutoRefresh/);
 assert.match(accountCard, /Continue with Google/);
