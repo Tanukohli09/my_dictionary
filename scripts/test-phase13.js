@@ -22,6 +22,8 @@ assert.match(packageJson.dependencies['expo-web-browser'], /^~57\./);
 assert.equal(appJson.expo.scheme, 'mydictionary');
 assert.match(authService, /flowType: 'pkce'/);
 assert.match(authService, /signInWithOAuth/);
+assert.match(authService, /skipBrowserRedirect: Platform\.OS !== 'web'/);
+assert.match(authService, /if \(Platform\.OS === 'web'\) return;/);
 assert.match(authService, /exchangeCodeForSession/);
 assert.match(authService, /SecureStore/);
 assert.match(authService, /EXPO_PUBLIC_GOOGLE_AUTH_ENABLED === 'true'/);

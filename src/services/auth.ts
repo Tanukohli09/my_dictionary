@@ -109,11 +109,13 @@ export async function signInWithGoogle() {
     provider: 'google',
     options: {
       redirectTo: getAuthRedirectUri(),
-      skipBrowserRedirect: true,
+      skipBrowserRedirect: Platform.OS !== 'web',
     },
   });
   if (error) throw error;
   if (!data.url) throw new Error('AUTH_URL_MISSING');
+
+  if (Platform.OS === 'web') return;
 
   const result = await WebBrowser.openAuthSessionAsync(data.url, getAuthRedirectUri());
   if (result.type === 'cancel' || result.type === 'dismiss') return;
