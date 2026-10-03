@@ -4,6 +4,7 @@ import { Platform } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { AppErrorBoundary } from './src/components/AppErrorBoundary';
+import { AuthProvider } from './src/context/AuthContext';
 import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
 
 function AppContent() {
@@ -29,9 +30,11 @@ function AppContent() {
 export default function App() {
   return (
     <ThemeProvider>
-      <AppErrorBoundary>
-        <AppContent />
-      </AppErrorBoundary>
+      <AuthProvider>
+        <AppErrorBoundary>
+          <AppContent />
+        </AppErrorBoundary>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

@@ -8,6 +8,7 @@ import {
   persistReviewSubmissions,
   persistWordEntries,
 } from './wordStorage';
+import { queueCloudSync } from './cloudSync';
 
 const BACKUP_FORMAT = 'my-dictionary-backup';
 const BACKUP_VERSION = 1;
@@ -183,5 +184,6 @@ export async function importLocalData(payload: string): Promise<ImportResult> {
 
   await persistWordEntries(uniqueWords);
   await persistReviewSubmissions(reviews);
+  void queueCloudSync().catch(() => undefined);
   return { wordsImported: uniqueWords.length, reviewsImported: reviews.length };
 }

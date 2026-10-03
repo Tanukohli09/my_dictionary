@@ -10,6 +10,8 @@
 
 Include your browser and device, the word that failed, the approximate time, the screen or message shown, and whether retrying helped. Never attach private notes, backup files, passwords, API keys, or authentication details.
 
+For an account-deletion problem, report that the **Delete account** action failed and include the approximate time and device. Do not include your email address, access token, backup, or private notes in a public issue.
+
 ## Report a problem
 
 Open the [My Dictionary issue tracker](https://github.com/Tanukohli09/my_dictionary/issues). Search existing issues first, then provide the smallest reproducible description.

@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { OwlMascot } from '../components/OwlMascot';
 import { PrimaryButton } from '../components/PrimaryButton';
+import { AccountCard } from '../components/AccountCard';
 import { AppColors } from '../theme/colors';
 import { useTheme } from '../theme/ThemeContext';
 import { typography } from '../theme/typography';
@@ -25,6 +26,7 @@ export function OnboardingScreen({ onStart, onPrivacy, onSupport }: { onStart: (
           <Text style={[styles.body, isTabletUp && styles.bodyWide]}>Search any word. We’ll show the meaning and save it alphabetically in your personal wordbook.</Text>
           <Text style={styles.note}>Your saved words stay on this browser or device. Searches use the dictionary service to find definitions.</Text>
           <PrimaryButton title="Start with your first word" onPress={onStart} />
+          <AccountCard compact />
           <View style={styles.footerLinks}>
             <Pressable accessibilityRole="link" accessibilityLabel="Read the privacy notice" onPress={onPrivacy}><Text style={styles.footerLink}>Privacy</Text></Pressable>
             <Text style={styles.footerSeparator}>·</Text>

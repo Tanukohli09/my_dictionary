@@ -26,7 +26,7 @@ export function DictionaryScreen({ words, openDetail, goSearch, sort, onSortOpen
     <ScrollView ref={scroll} contentContainerStyle={[styles.content, isTabletUp && styles.contentWide]} showsVerticalScrollIndicator={false}>
       <ResponsivePage>
         <ScreenHeader title="My Dictionary" right="⇅" onLeft={onMenu} onRight={onSortOpen} leftLabel="Open navigation menu" rightLabel="Arrange dictionary words" />
-        <View style={isTabletUp && styles.searchWide}><SearchBar placeholder="Search your words..." value={query} onChangeText={setQuery} /></View>
+        <View style={isTabletUp && styles.searchWide}><SearchBar placeholder="Search your words..." accessibilityHint="Type text to filter your saved words." value={query} onChangeText={setQuery} /></View>
         {list.empty ? <EmptyState title={emptyDictionaryTitle(sort)} subtitle="Search a word and it will appear here alphabetically." button="Search First Word" onPress={goSearch} /> : list.mode === 'sections'
           ? <View style={isTabletUp && styles.sectionsWide}>{list.sections.map((section) => <View key={section.letter} onLayout={(event) => { positions.current[section.letter] = event.nativeEvent.layout.y; }}><DictionarySection letter={section.letter} words={section.words} onWordPress={openDetail} /></View>)}</View>
           : <View style={[styles.list, isTabletUp && styles.listWide]}>{list.rows.map(({ word, meta }) => <WordCard key={word.id} word={word} onPress={() => openDetail(word)} meta={meta} />)}</View>}

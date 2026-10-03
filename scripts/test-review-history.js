@@ -11,6 +11,7 @@ const AsyncStorage = {
 
 const originalLoad = Module._load;
 Module._load = function patchedLoad(request, parent, isMain) {
+  if (request === './auth') return { getCurrentAuthUserId: async () => null, supabase: null };
   if (request === '@react-native-async-storage/async-storage') return { __esModule: true, default: AsyncStorage };
   return originalLoad.call(this, request, parent, isMain);
 };

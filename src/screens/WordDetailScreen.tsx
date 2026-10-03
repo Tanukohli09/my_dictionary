@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, Linking, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ResponsivePage } from '../components/ResponsivePage';
 import { WordEntry } from '../models/WordEntry';
@@ -10,6 +10,7 @@ import { typography } from '../theme/typography';
 import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
 import { formatDate } from '../utils/dateUtils';
 import { SourceAttribution } from '../components/SourceAttribution';
+import { openPronunciationAudio } from '../utils/audio';
 
 export function WordDetailScreen({ word, onBack, onChanged, onDelete, openNote }: { word: WordEntry; onBack: () => void; onChanged: (w: WordEntry) => void; onDelete: () => Promise<void>; openNote: (w: WordEntry) => void }) {
   const { isTabletUp } = useResponsiveLayout();
@@ -18,7 +19,12 @@ export function WordDetailScreen({ word, onBack, onChanged, onDelete, openNote }
   const [myMeaning, setMyMeaning] = useState(word.my_meaning || '');
   const [saveError, setSaveError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [audioError, setAudioError] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  async function playAudio() {
+    setAudioError(false);
+    if (!word.audio_url || !(await openPronunciationAudio(word.audio_url))) setAudioError(true);
+  }
   async function saveMeaning() {
     try {
       setSaveError(null);
@@ -60,7 +66,8 @@ export function WordDetailScreen({ word, onBack, onChanged, onDelete, openNote }
         <View style={[styles.detailGrid, isTabletUp && styles.detailGridWide]}>
           <View style={styles.mainColumn}>
             <Text numberOfLines={1} adjustsFontSizeToFit style={[styles.title, isTabletUp && styles.titleWide]}>{word.word}</Text>
-            <View style={styles.soundRow}><Text style={styles.phonetic}>{word.phonetic || 'Pronunciation not available'}</Text>{word.audio_url ? <Pressable accessibilityRole="button" accessibilityLabel={`Play pronunciation for ${word.word}`} onPress={() => Linking.openURL(word.audio_url!)}><Text style={styles.sound}>↯</Text></Pressable> : <Text accessibilityLabel="Pronunciation unavailable" style={[styles.sound, { opacity: 0.35 }]}>↯</Text>}</View>
+            <View style={styles.soundRow}><Text style={styles.phonetic}>{word.phonetic || 'Pronunciation not available'}</Text>{word.audio_url ? <Pressable accessibilityRole="button" accessibilityLabel={`Play pronunciation for ${word.word}`} accessibilityHint="Open secure pronunciation audio." onPress={() => { void playAudio(); }} hitSlop={8}><Text style={styles.sound}>↯</Text></Pressable> : <Text accessibilityLabel="Pronunciation unavailable" style={[styles.sound, { opacity: 0.35 }]}>↯</Text>}</View>
+            {audioError && <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.audioError}>Pronunciation audio is unavailable right now.</Text>}
             {!!word.part_of_speech && <Text style={styles.pos}>{word.part_of_speech}</Text>}
             <View style={styles.entryBlock}>
               <Text style={styles.label}>Meaning</Text>
@@ -81,7 +88,7 @@ export function WordDetailScreen({ word, onBack, onChanged, onDelete, openNote }
               {!!saveError && <Text style={styles.error}>{saveError}</Text>}
             </View>
             <Text style={styles.meta}>Searched {word.search_count} times{`\n`}Added on {formatDate(word.created_at)}</Text>
-            <View style={styles.deleteWrap}><PrimaryButton title={deleting ? 'Removing…' : 'Remove from dictionary'} onPress={requestDelete} variant="danger" /></View>
+            <View style={styles.deleteWrap}><PrimaryButton title={deleting ? 'Removing…' : 'Remove from dictionary'} onPress={requestDelete} variant="danger" disabled={deleting} busy={deleting} accessibilityHint="Permanently remove this saved word from your dictionary." /></View>
             {!!deleteError && <Text style={styles.error}>{deleteError}</Text>}
           </View>
         </View>
@@ -122,4 +129,5 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
   meta: { marginTop: 10, color: colors.muted, fontSize: 11, lineHeight: 18 },
   deleteWrap: { marginTop: 10 },
   error: { color: colors.error, fontSize: 11, lineHeight: 17, marginTop: 6 },
+  audioError: { color: colors.error, fontSize: 12, lineHeight: 18, marginTop: -4, marginBottom: 4 },
 });

@@ -1,5 +1,5 @@
-import React from 'react';
-import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { BookmarkButton } from '../components/BookmarkButton';
 import { ResponsivePage } from '../components/ResponsivePage';
 import { SavedStamp } from '../components/SavedStamp';
@@ -10,12 +10,18 @@ import { AppColors } from '../theme/colors';
 import { useTheme } from '../theme/ThemeContext';
 import { typography } from '../theme/typography';
 import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
+import { openPronunciationAudio } from '../utils/audio';
 
 export function WordResultScreen({ word, created, onBack, onChanged }: { word: WordEntry; created: boolean; onBack: () => void; onChanged: (w: WordEntry) => void }) {
   const { isTabletUp } = useResponsiveLayout();
   const { colors } = useTheme();
   const styles = createStyles(colors);
+  const [audioError, setAudioError] = useState(false);
   async function toggleFavorite() { onChanged(await toggleSavedWordFavourite(word)); }
+  async function playAudio() {
+    setAudioError(false);
+    if (!word.audio_url || !(await openPronunciationAudio(word.audio_url))) setAudioError(true);
+  }
   return (
     <ScrollView style={styles.screen} contentContainerStyle={[styles.content, isTabletUp && styles.contentWide]} showsVerticalScrollIndicator={false}>
       <ResponsivePage>
@@ -23,7 +29,8 @@ export function WordResultScreen({ word, created, onBack, onChanged }: { word: W
         <View style={[styles.layout, isTabletUp && styles.layoutWide]}>
           <View style={[styles.page, isTabletUp && styles.pageWide]}>
             <Text style={[styles.title, isTabletUp && styles.titleWide]}>{word.word}</Text>
-            <View style={styles.soundRow}><Text style={styles.phonetic}>{word.phonetic || 'Pronunciation not available'}</Text>{word.audio_url ? <Pressable accessibilityRole="button" accessibilityLabel={`Play pronunciation for ${word.word}`} onPress={() => Linking.openURL(word.audio_url!)}><Text style={styles.speaker}>↯</Text></Pressable> : <Text accessibilityLabel="Pronunciation unavailable" style={[styles.speaker, { opacity: .35 }]}>↯</Text>}</View>
+            <View style={styles.soundRow}><Text style={styles.phonetic}>{word.phonetic || 'Pronunciation not available'}</Text>{word.audio_url ? <Pressable accessibilityRole="button" accessibilityLabel={`Play pronunciation for ${word.word}`} accessibilityHint="Open secure pronunciation audio." onPress={() => { void playAudio(); }} hitSlop={8}><Text style={styles.speaker}>↯</Text></Pressable> : <Text accessibilityLabel="Pronunciation unavailable" style={[styles.speaker, { opacity: .35 }]}>↯</Text>}</View>
+            {audioError && <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.audioError}>Pronunciation audio is unavailable right now.</Text>}
             {word.part_of_speech && <Text style={styles.pos}>{word.part_of_speech}</Text>}
             <WordDefinitionBlock word={word} />
           </View>
@@ -50,4 +57,5 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
   phonetic: { color: colors.text, fontSize: 15 },
   speaker: { fontSize: 16, color: colors.text, fontWeight: '900' },
   pos: { alignSelf: 'flex-start', color: colors.greenDark, fontWeight: '700', fontSize: 14, marginBottom: 22 },
+  audioError: { color: colors.error, fontSize: 12, lineHeight: 18, marginTop: -8, marginBottom: 12 },
 });

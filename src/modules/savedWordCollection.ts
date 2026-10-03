@@ -3,6 +3,7 @@ import { deleteStoredWord, loadReviewSubmissions as loadStoredReviewSubmissions,
 import { ReviewSubmission } from '../models/ReviewSubmission';
 import { WordEntry } from '../models/WordEntry';
 import { normalizeWord } from '../utils/normalizeWord';
+import { queueCloudSync } from '../services/cloudSync';
 
 export type SavedWordSearchResult = { entry: WordEntry; created: boolean };
 export type DictionaryLookupAdapter = (input: string) => Promise<WordEntry>;
@@ -20,6 +21,7 @@ export async function searchSavedWord(input: string, lookup: DictionaryLookupAda
   if (existing) {
     const touched = touchSearch(existing);
     await persistWordEntries(words.map((word) => word.id === existing.id ? touched : word));
+    void queueCloudSync().catch(() => undefined);
     return { entry: touched, created: false };
   }
 
@@ -28,12 +30,14 @@ export async function searchSavedWord(input: string, lookup: DictionaryLookupAda
   if (duplicate) return { entry: duplicate, created: false };
 
   await persistWordEntries([...words, entry]);
+  void queueCloudSync().catch(() => undefined);
   return { entry, created: true };
 }
 
 export async function saveSavedWord(entry: WordEntry): Promise<WordEntry> {
   const next = stampUpdated(entry);
   await upsertStoredWord(next);
+  void queueCloudSync().catch(() => undefined);
   return next;
 }
 
@@ -51,6 +55,7 @@ export async function saveSavedWordNote(entry: WordEntry, note: string): Promise
 
 export async function removeSavedWord(entry: WordEntry): Promise<void> {
   await deleteStoredWord(entry.id);
+  void queueCloudSync().catch(() => undefined);
 }
 
 export async function recordReviewAnswer(entry: WordEntry, correct: boolean): Promise<WordEntry> {
@@ -70,7 +75,9 @@ export async function loadReviewSubmissions(): Promise<ReviewSubmission[]> {
 }
 
 export async function saveReviewSubmission(submission: ReviewSubmission): Promise<ReviewSubmission> {
-  return saveStoredReviewSubmission(submission);
+  const saved = await saveStoredReviewSubmission(submission);
+  void queueCloudSync().catch(() => undefined);
+  return saved;
 }
 
 function touchSearch(entry: WordEntry): WordEntry {

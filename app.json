@@ -2,9 +2,11 @@
   "expo": {
     "name": "My Dictionary",
     "slug": "my-dictionary",
+    "scheme": "mydictionary",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "icon": "./src/assets/app-icon.png",
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -12,8 +14,12 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.tanukohli.mydictionary",
+      "versionCode": 1,
+      "permissions": [],
       "adaptiveIcon": {
-        "backgroundColor": "#FFF8E7"
+        "backgroundColor": "#FFF8E7",
+        "foregroundImage": "./src/assets/app-icon-foreground.png"
       }
     },
     "web": {
@@ -22,6 +28,9 @@
       "description": "A local-first dictionary and vocabulary learning app."
     },
     "plugins": [
+      "expo-web-browser",
+      "expo-secure-store",
+      "./plugins/withSecureAndroid.js",
       "expo-status-bar",
       [
         "expo-splash-screen",

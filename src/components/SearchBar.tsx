@@ -8,10 +8,10 @@ import { typography } from '../theme/typography';
 export function SearchBar(props: TextInputProps) {
   const { colors } = useTheme();
   const styles = createStyles(colors);
-  return <View style={styles.wrap}><Text accessibilityElementsHidden style={styles.icon}>⌕</Text><TextInput {...props} accessibilityLabel={props.accessibilityLabel || props.placeholder || 'Search'} placeholderTextColor={colors.muted} style={styles.input} returnKeyType="search" /></View>;
+  return <View style={styles.wrap}><Text accessibilityElementsHidden style={styles.icon}>⌕</Text><TextInput {...props} accessibilityLabel={props.accessibilityLabel || props.placeholder || 'Search'} accessibilityHint={props.accessibilityHint || 'Type text and press Search to submit.'} placeholderTextColor={colors.muted} style={styles.input} returnKeyType="search" /></View>;
 }
 const createStyles = (colors: AppColors) => StyleSheet.create({
-  wrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.input, borderWidth: 1, borderColor: colors.border, borderRadius: 9, paddingHorizontal: spacing.md, minHeight: 38 },
+  wrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.input, borderWidth: 1, borderColor: colors.border, borderRadius: 9, paddingHorizontal: spacing.md, minHeight: 44 },
   icon: { fontSize: 17, color: colors.text, marginRight: spacing.sm },
   input: { flex: 1, color: colors.text, fontFamily: typography.sans, fontSize: 12, paddingVertical: 0 },
 });

@@ -11,6 +11,6 @@ export function AlphabetIndex({ available, onPress }: { available: string[]; onP
 }
 const createStyles = (colors: AppColors) => StyleSheet.create({
   index: { position: 'absolute', right: 9, top: 136, bottom: 58, justifyContent: 'center', borderRadius: 12, paddingHorizontal: 2 },
-  letter: { fontSize: 10, color: colors.text, paddingVertical: 1.2, fontWeight: '700' },
+  letter: { minWidth: 24, minHeight: 24, textAlign: 'center', textAlignVertical: 'center', fontSize: 10, color: colors.text, paddingVertical: 4, fontWeight: '700' },
   available: { color: colors.greenDark, fontWeight: '900' },
 });

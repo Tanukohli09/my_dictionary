@@ -96,9 +96,10 @@ Current implications:
 - Clearing browser storage removes the user’s collection.
 - There is no account, sync, cloud backup, export, or import flow.
 - There is no visible “clear all data” or “delete my data” flow even though storage operations exist.
-- Storage load failures are generally converted to empty arrays, which can make a real data problem look like a user’s collection disappeared.
+- Malformed or partial storage is now detected and surfaced through the Phase 23 recovery notice; a full versioned migration framework remains outstanding.
 - The in-progress review session is not durable across reloads or app restarts.
-- There is no schema migration and recovery strategy for future `WordEntry` changes.
+- Phase 23 now validates persisted collections, preserves a user-scoped recovery copy for malformed or partial data, and shows a recovery path instead of presenting corruption as a healthy empty collection.
+- There is still no full schema-migration framework for future `WordEntry` changes; upgrade scenarios must be tested before changing the stored shape.
 
 This must be clearly positioned. If the product is local-only, add export/import and transparent storage messaging. If it is intended to be a service for real users, introduce authentication, a server-side user model, sync conflict rules, backups, and account deletion.
 

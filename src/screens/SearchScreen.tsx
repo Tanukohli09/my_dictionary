@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ErrorState } from '../components/ErrorState';
 import { LoadingState } from '../components/LoadingState';
@@ -16,29 +16,37 @@ import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
 import { greeting } from '../utils/dateUtils';
 import { normalizeWord } from '../utils/normalizeWord';
 
-const sample = { word: 'Ephemeral', phonetic: '/ɪˈfemərəl/', meaning_short: 'existing for a very short time.' };
-
 export function SearchScreen({ words, reload, openResult, openDetail, goDictionary, onMenu }: { words: WordEntry[]; reload: () => Promise<void>; openResult: (word: WordEntry, created: boolean) => void; openDetail: (word: WordEntry) => void; goDictionary: () => void; onMenu?: () => void }) {
   const { isTabletUp } = useResponsiveLayout();
   const { colors } = useTheme();
   const styles = createStyles(colors);
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
+  const searching = useRef(false);
+  const mounted = useRef(true);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const recent = [...words].sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 3);
-  const wordOfDay = words.find((word) => word.word === 'Ephemeral') || sample;
+  const dailyWords = [...words].sort((a, b) => a.normalized_word.localeCompare(b.normalized_word));
+  const wordOfDay = dailyWords.length
+    ? dailyWords[Math.floor(Date.now() / 86_400_000) % dailyWords.length]
+    : null;
 
   async function search() {
+    if (searching.current) return;
     const normalized = normalizeWord(query);
     if (!normalized) return Alert.alert('A tiny blank page', 'Type a word to search.');
     setErrorMessage(null);
+    searching.current = true;
     setLoading(true);
     try {
       const saved = await searchSavedWord(normalized);
       await reload();
+      if (!mounted.current) return;
       openResult(saved.entry, saved.created);
       setQuery('');
     } catch (error) {
+      if (!mounted.current) return;
       if (error instanceof Error && error.message === 'NOT_FOUND') {
         setErrorMessage('We could not find this word. Check the spelling and try again.');
       } else if (error instanceof Error && error.message === 'LOOKUP_TIMEOUT') {
@@ -48,7 +56,7 @@ export function SearchScreen({ words, reload, openResult, openDetail, goDictiona
       } else {
         setErrorMessage('The dictionary service is temporarily unavailable. Check your connection and try again.');
       }
-    } finally { setLoading(false); }
+    } finally { searching.current = false; if (mounted.current) setLoading(false); }
   }
 
   function updateQuery(value: string) {
@@ -69,16 +77,21 @@ export function SearchScreen({ words, reload, openResult, openDetail, goDictiona
               </View>
               <View style={styles.heroOwl}><OwlMascot size={isTabletUp ? 132 : 88} variant="search" /></View>
             </View>
-            <SearchBar placeholder="Search a word..." value={query} onChangeText={updateQuery} onSubmitEditing={search} autoCapitalize="none" />
+            <SearchBar placeholder="Search a word..." accessibilityHint="Type a word and press Search to look up its meaning." value={query} onChangeText={updateQuery} onSubmitEditing={search} autoCapitalize="none" />
             {loading && <LoadingState />}
             {!loading && errorMessage && <ErrorState message={errorMessage} onRetry={search} />}
           </View>
           <View style={styles.sideColumn}>
             <PaperCard style={[styles.wotd, isTabletUp && styles.wotdWide]}>
-              <View style={styles.wotdTop}><Text style={styles.tiny}>Word of the day</Text><Text style={styles.star}>★</Text></View>
-              <Text style={styles.word}>{wordOfDay.word}</Text>
-              <Text style={styles.phonetic}>{wordOfDay.phonetic}</Text>
-              <Text style={styles.meaning}>{wordOfDay.meaning_short}</Text>
+              <View style={styles.wotdTop}><Text style={styles.tiny}>Your word of the day</Text><Text style={styles.star}>★</Text></View>
+              {wordOfDay ? <>
+                <Text style={styles.word}>{wordOfDay.word}</Text>
+                <Text style={styles.phonetic}>{wordOfDay.phonetic}</Text>
+                <Text style={styles.meaning}>{wordOfDay.meaning_short}</Text>
+              </> : <>
+                <Text style={styles.emptyWotdTitle}>Your first word is waiting</Text>
+                <Text style={styles.emptyWotd}>Search and save a word to see a real entry here each day.</Text>
+              </>}
             </PaperCard>
             <View style={styles.recentHead}><Text style={styles.recentTitle}>Recently added</Text>{!!recent.length && <Pressable accessibilityRole="button" accessibilityLabel="See all saved words" onPress={goDictionary}><Text style={styles.seeAll}>See all</Text></Pressable>}</View>
             <View style={styles.rows}>{recent.length ? recent.map((item) => <Pressable key={item.id} accessibilityRole="button" accessibilityLabel={`Open ${item.word}`} onPress={() => openDetail(item)}><Text style={styles.rowText}>{item.word}</Text></Pressable>) : <Text style={styles.emptyRecent}>Search your first word to build your wordbook.</Text>}</View>
@@ -112,6 +125,8 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
   word: { fontFamily: typography.serif, fontSize: 21, fontWeight: '800', color: colors.text, marginTop: 8 },
   phonetic: { color: colors.text, fontSize: 12, marginVertical: 3 },
   meaning: { color: colors.text, fontSize: 13, lineHeight: 20 },
+  emptyWotdTitle: { fontFamily: typography.serif, fontSize: 18, lineHeight: 24, fontWeight: '800', color: colors.text, marginTop: 8 },
+  emptyWotd: { color: colors.muted, fontSize: 13, lineHeight: 20, marginTop: 4 },
   recentHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 2 },
   recentTitle: { color: colors.text, fontSize: 15, fontWeight: '700' },
   seeAll: { color: colors.muted, fontSize: 12 },

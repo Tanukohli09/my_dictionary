@@ -7,6 +7,7 @@
   },
   "main": "expo/AppEntry.js",
   "scripts": {
+    "test:all": "node scripts/test-all.js",
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
@@ -26,14 +27,31 @@
     "test:phase9": "node scripts/test-phase9.js",
     "test:phase10": "node scripts/test-phase10.js",
     "test:phase11": "node scripts/test-phase11.js",
+    "test:phase12": "node scripts/test-phase12.js",
+    "test:phase13": "node scripts/test-phase13.js",
+    "test:phase14": "node scripts/test-phase14.js",
+    "test:phase15": "node scripts/test-phase15.js",
+    "test:phase16": "node scripts/test-phase16.js",
+    "test:phase17": "node scripts/test-phase17.js",
+    "test:phase18": "node scripts/test-phase18.js",
+    "test:phase19": "node scripts/test-phase19.js",
+    "test:phase20": "node scripts/test-phase20.js",
+    "test:phase21": "node scripts/test-phase21.js",
+    "test:phase22": "node scripts/test-phase22.js",
+    "test:phase23": "node scripts/test-phase23.js",
     "monitor:smoke": "node scripts/hosted-monitor.js",
+    "release:preflight": "node scripts/release-preflight.js",
     "test:release": "npm run build:web && node scripts/test-release-smoke.js",
     "release:smoke": "node scripts/release-smoke.js",
     "beta:smoke": "node scripts/beta-smoke.js"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
-    "expo": "^57.0.25",
+    "@supabase/supabase-js": "^2.117.2",
+    "expo": "~57.0.26",
+    "expo-auth-session": "~57.0.13",
+    "expo-secure-store": "~57.0.4",
+    "expo-web-browser": "~57.0.3",
     "expo-linear-gradient": "~57.0.2",
     "expo-splash-screen": "~57.0.9",
     "expo-status-bar": "~57.0.1",
@@ -42,6 +60,11 @@
     "react-native": "0.86.3",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-web": "^0.21.0"
+  },
+  "overrides": {
+    "xcode": {
+      "uuid": "11.1.1"
+    }
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",

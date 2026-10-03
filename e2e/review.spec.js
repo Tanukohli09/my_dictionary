@@ -63,7 +63,9 @@ test('keeps the same review word after answer selection until Next is pressed', 
     Math.random = () => randomValues[index++] ?? 0.5;
   }, { nextWordIndex });
 
-  await page.getByText(/^A\)/).click();
+  const firstAnswer = page.getByRole('button', { name: /Choose answer A:/ });
+  await firstAnswer.click();
+  await expect(firstAnswer).toBeDisabled();
   await expect(page.getByText('Next')).toBeVisible();
   await page.waitForFunction(([storageKey, initialWord]) => {
     const saved = JSON.parse(window.localStorage.getItem(storageKey) || '[]');

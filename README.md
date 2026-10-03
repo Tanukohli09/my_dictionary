@@ -111,6 +111,24 @@ The repository also includes [production-monitor.yml](.github/workflows/producti
 
 The invite-only beta checklist and privacy-safe tester instructions are in [CONTROLLED_BETA.md](CONTROLLED_BETA.md). Do not share the beta broadly until the owner has completed the remaining manual and legal sign-offs.
 
+The account and Android release foundation is documented in [PHASE_12_ACCOUNT_AND_ANDROID_FOUNDATION.md](PHASE_12_ACCOUNT_AND_ANDROID_FOUNDATION.md), and the Google authentication client is documented in [PHASE_13_GOOGLE_AUTHENTICATION.md](PHASE_13_GOOGLE_AUTHENTICATION.md). Authentication remains inactive until Supabase and Google OAuth configuration is supplied; the current beta remains local-first.
+
+The cloud schema and local-first synchronization rules are documented in [PHASE_14_CLOUD_SYNC.md](PHASE_14_CLOUD_SYNC.md) and [supabase/README.md](supabase/README.md). Cloud sync is inactive until the schema and public Supabase variables are configured.
+
+Authenticated test coverage and the Android/EAS release checklist are documented in [PHASE_15_AUTH_AND_ANDROID_VALIDATION.md](PHASE_15_AUTH_AND_ANDROID_VALIDATION.md). The repository-side checks are available with `npm run test:phase15`; live two-account isolation and signed Android builds still require the owner's configured Supabase, Google, EAS, and Play Console accounts.
+
+Account-isolated local storage, OAuth callback cleanup, and Android launcher assets are documented in [PHASE_16_ACCOUNT_ISOLATION_AND_STORE_IDENTITY.md](PHASE_16_ACCOUNT_ISOLATION_AND_STORE_IDENTITY.md). Run `npm run test:phase16` to verify the account boundary without real credentials.
+
+Production configuration enforcement is documented in [PHASE_17_RELEASE_PREFLIGHT.md](PHASE_17_RELEASE_PREFLIGHT.md). Run `npm run release:preflight` locally, and run `npm run release:preflight -- --strict` before approving a production build.
+
+Account deletion and synchronized-data lifecycle handling are documented in [PHASE_18_ACCOUNT_DELETION.md](PHASE_18_ACCOUNT_DELETION.md). The repository check is `npm run test:phase18`; the Supabase Edge Function still needs to be deployed and verified in staging.
+
+Android Play Store release identity, native network hardening, and the submission/data-safety worksheet are documented in [PHASE_19_ANDROID_PLAY_RELEASE.md](PHASE_19_ANDROID_PLAY_RELEASE.md). Run `npm run test:phase19` before creating an EAS Android build.
+
+Privacy-safe support diagnostics are documented in [PHASE_20_SUPPORT_DIAGNOSTICS.md](PHASE_20_SUPPORT_DIAGNOSTICS.md). The Support screen can provide a request ID and provider without exposing saved words, notes, tokens, or account details.
+
+Production empty-state behavior is documented in [PHASE_21_REAL_EMPTY_STATES.md](PHASE_21_REAL_EMPTY_STATES.md). The search screen no longer presents a hard-coded sample word as a user’s progress or word of the day.
+
 Never put `DICTIONARY_API_KEY` or other provider secrets in an `EXPO_PUBLIC_*` variable: Expo embeds those values in the client bundle.
 
 ## Privacy and support
@@ -119,7 +137,7 @@ The app includes privacy and support links before onboarding and from the Profil
 
 Security reports must follow [SECURITY.md](SECURITY.md); do not put secrets or exploit details in public issues.
 
-The GitHub Actions quality workflow runs Expo compatibility checks, type checking, core behavior checks, server hardening tests, and the release smoke contract on pushes and pull requests. It also uploads an npm audit report. The current Expo 57 production dependency graph reports 11 moderate Expo build-tool advisories and no high or critical findings in the current audit; do not use a forced audit fix because it proposes an unsupported major downgrade.
+The GitHub Actions quality workflow runs Expo compatibility checks, type checking, core behavior checks, server hardening tests, and the release smoke contract on pushes and pull requests. It also uploads an npm audit report. After the October 2 UUID remediation, the audit reports 0 moderate and 4 high findings in the Expo dependency graph. See DEPENDENCY_REMEDIATION.md for verification and the unpatched node-forge blocker; npm's forced fix proposes an incompatible Expo downgrade.
 
 ## Available Scripts
 
@@ -195,7 +213,65 @@ npm run test:server
 
 Run the production configuration, CORS, metrics, health, readiness, and provider-fallback checks.
 
+```bash
+npm run test:phase15
+```
+
+Validate the Google account boundary and Android/EAS release configuration.
+
+```bash
+npm run test:phase16
+```
+
+Validate user-scoped local storage, sign-out isolation, OAuth cleanup, and Android store identity.
+
+```bash
+npm run test:phase17
+```
+
+Validate release preflight behavior and CI enforcement.
+
+```bash
+npm run test:phase18
+```
+
+Validate account-deletion wiring and local data cleanup.
+
+```bash
+npm run test:phase19
+```
+
+Validate Android store identity, release configuration, native network posture, and Play Store documentation.
+
+```bash
+npm run test:phase20
+```
+
+Validate privacy-safe support diagnostics and their Support-screen wiring.
+
+```bash
+npm run test:phase21
+```
+
+Validate that an empty wordbook never displays demo word content.
+
+```bash
+npm run test:phase22
+```
+
+Validate accessibility announcements, mobile interaction targets, review answer states, and safe pronunciation handling.
+
+```bash
+npm run test:phase23
+```
+
+Validate local-storage integrity checks, recovery copies, partial-data repair, and the user recovery notice.
+
 ## Project Structure
+
+Run every checked-in Node test and the full browser suite with `npm run test:all`.
+Current remaining release work is recorded in `PHASE_24_FINAL_RESILIENCE.md`,
+`PHASE_25_LIVE_VERIFICATION.md`, and `PHASE_26_LAUNCH_STATUS.md`.
 
 ```text
 .

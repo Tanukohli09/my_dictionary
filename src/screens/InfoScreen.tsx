@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Linking, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ResponsivePage } from '../components/ResponsivePage';
 import { InfoKind } from '../navigation/navigationFlow';
+import { shareSupportDiagnostics } from '../services/diagnostics';
 import { AppColors } from '../theme/colors';
 import { useTheme } from '../theme/ThemeContext';
 import { typography } from '../theme/typography';
@@ -56,28 +57,42 @@ function PrivacyContent({ styles }: { styles: InfoStyles }) {
   return (
     <View style={styles.sections}>
       <InfoSection styles={styles} title="What stays on your device">
-        <Text style={styles.body}>Saved words, notes, favourites, review history, theme choice, and onboarding state are stored locally in this browser or device. My Dictionary does not require an account or upload your personal wordbook for sync.</Text>
+        <Text style={styles.body}>Saved words, notes, favourites, review history, theme choice, and onboarding state are stored locally in this browser or device. An optional Google account can be used for sign-in; in configured releases, cloud synchronization links this wordbook to the authenticated user.</Text>
+      </InfoSection>
+      <InfoSection styles={styles} title="Optional Google sign-in">
+        <Text style={styles.body}>When enabled, Google and the authentication provider process the account identity details needed to create and maintain your session, such as your email address and display name. You can continue using the local dictionary without signing in.</Text>
       </InfoSection>
       <InfoSection styles={styles} title="What happens when you search">
         <Text style={styles.body}>The word you submit is sent to the My Dictionary server so it can request a definition. The service uses Datamuse as its primary provider and Wiktionary as a fallback. Those providers and the hosting platform may process requests under their own terms.</Text>
       </InfoSection>
       <InfoSection styles={styles} title="Operational data">
-        <Text style={styles.body}>The server keeps a short-lived definition cache and records operational events such as request IDs, provider, status, latency, and cache hits. The app does not intentionally store your saved words or personal notes on the server.</Text>
+        <Text style={styles.body}>The dictionary service keeps a short-lived definition cache and records operational events such as request IDs, provider, status, latency, and cache hits. In configured account-sync releases, the Supabase database also stores user-scoped saved words, notes, and review history for synchronization.</Text>
       </InfoSection>
       <InfoSection styles={styles} title="Your choices">
-        <Text style={styles.body}>Use Export backup before changing devices, and use Clear saved data in Profile when you want to remove the local wordbook. Clearing browser site data or uninstalling the app also removes local storage.</Text>
+        <Text style={styles.body}>Use Export backup before changing devices, and use Clear saved data in Profile when you want to remove the local wordbook. If you sign in, you can sign out from Profile. Clearing browser site data or uninstalling the app also removes local storage.</Text>
       </InfoSection>
       <InfoSection styles={styles} title="Dictionary sources">
         <Text style={styles.body}>Definitions are supplied by the configured dictionary providers. Review their policies for current terms and attribution details.</Text>
         <ExternalLink styles={styles} label="Open Datamuse API information" url={DATAMUSE_URL} />
         <ExternalLink styles={styles} label="Open Wiktionary" url={WIKTIONARY_URL} />
       </InfoSection>
-      <Text style={styles.lastUpdated}>Last reviewed: September 2026. This notice should be reviewed again before a public launch with a custom domain, analytics, accounts, or additional providers.</Text>
+      <Text style={styles.lastUpdated}>Last reviewed: October 2026. This notice should be reviewed again before a public launch with a custom domain, analytics, account sync, or additional providers.</Text>
     </View>
   );
 }
 
 function SupportContent({ styles }: { styles: InfoStyles }) {
+  const [diagnosticStatus, setDiagnosticStatus] = useState<string | null>(null);
+
+  async function shareDiagnostics() {
+    try {
+      const result = await shareSupportDiagnostics();
+      setDiagnosticStatus(result === 'copied' ? 'Privacy-safe diagnostics copied.' : 'Privacy-safe diagnostics are ready to share.');
+    } catch {
+      setDiagnosticStatus('Could not prepare diagnostics. Please include your device and the visible error instead.');
+    }
+  }
+
   return (
     <View style={styles.sections}>
       <InfoSection styles={styles} title="Before reporting a problem">
@@ -85,6 +100,13 @@ function SupportContent({ styles }: { styles: InfoStyles }) {
       </InfoSection>
       <InfoSection styles={styles} title="What to include">
         <Text style={styles.body}>Include your browser and device, the word that failed, the approximate time, and the message shown on screen. Do not include private notes, backup files, passwords, or API keys.</Text>
+      </InfoSection>
+      <InfoSection styles={styles} title="Technical diagnostics">
+        <Text style={styles.body}>Use this only when support asks for technical details. The report contains app runtime, cloud-sync status, and the latest dictionary request ID/provider; it does not include saved words, notes, backups, tokens, or account details.</Text>
+        <Pressable accessibilityRole="button" accessibilityLabel="Copy technical diagnostics" onPress={() => { void shareDiagnostics(); }} style={styles.diagnosticsButton}>
+          <Text style={styles.link}>Copy technical diagnostics</Text>
+        </Pressable>
+        {!!diagnosticStatus && <Text accessibilityLiveRegion="polite" style={styles.diagnosticStatus}>{diagnosticStatus}</Text>}
       </InfoSection>
       <InfoSection styles={styles} title="Report an issue">
         <Text style={styles.body}>Support is currently handled through the project issue tracker. Please search existing reports first, then open a new issue with the details above.</Text>
@@ -138,6 +160,8 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
   sectionTitle: { color: colors.text, fontFamily: typography.serif, fontSize: 20, lineHeight: 26, fontWeight: '900' },
   body: { color: colors.muted, fontSize: 14, lineHeight: 23 },
   linkButton: { alignSelf: 'flex-start', paddingVertical: 4 },
+  diagnosticsButton: { alignSelf: 'flex-start', borderWidth: 1, borderColor: colors.border, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 9 },
   link: { color: colors.greenDark, fontSize: 14, lineHeight: 22, fontWeight: '900' },
+  diagnosticStatus: { color: colors.muted, fontSize: 12, lineHeight: 19 },
   lastUpdated: { color: colors.faint, fontSize: 12, lineHeight: 19, marginTop: 4 },
 });

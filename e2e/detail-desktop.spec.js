@@ -66,3 +66,25 @@ test('desktop note editor saves text back to my meaning', async ({ page }) => {
     return saved[0]?.my_meaning;
   }, STORAGE_KEY)).toBe('A blossom I want to remember.');
 });
+
+test('failed note save preserves text and allows retry', async ({ page }) => {
+  await page.goto('/?screen=detail', { waitUntil: 'networkidle' });
+  await page.getByRole('button', { name: 'Edit my meaning' }).click();
+  const input = page.getByRole('textbox', { name: 'Your personal meaning' });
+  await input.fill('Keep this draft');
+  await page.evaluate(() => {
+    const original = Storage.prototype.setItem;
+    Storage.prototype.setItem = function(key, value) {
+      if (key === 'my-dictionary.words.v1') {
+        Storage.prototype.setItem = original;
+        throw new Error('Simulated full storage');
+      }
+      return original.call(this, key, value);
+    };
+  });
+  await page.getByRole('button', { name: 'Save my meaning' }).click();
+  await expect(page.getByRole('alert')).toContainText('Could not save');
+  await expect(input).toHaveValue('Keep this draft');
+  await page.getByRole('button', { name: 'Save my meaning' }).click();
+  await expect(page.getByText('My meaning', { exact: true })).toBeVisible();
+});

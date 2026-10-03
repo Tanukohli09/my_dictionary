@@ -6,6 +6,7 @@ import { BottomTabs } from '../components/BottomTabs';
 import { DesktopNavigation } from '../components/DesktopNavigation';
 import { ErrorState } from '../components/ErrorState';
 import { PhoneFrame } from '../components/PhoneFrame';
+import { StorageRecoveryNotice } from '../components/StorageRecoveryNotice';
 import { WordEntry } from '../models/WordEntry';
 import { DictionaryScreen } from '../screens/DictionaryScreen';
 import { InfoScreen } from '../screens/InfoScreen';
@@ -19,22 +20,27 @@ import { WordDetailScreen } from '../screens/WordDetailScreen';
 import { WordResultScreen } from '../screens/WordResultScreen';
 import { loadReviewSubmissions, loadSavedWords, removeSavedWord } from '../modules/savedWordCollection';
 import { ReviewSubmission } from '../models/ReviewSubmission';
-import { hasOnboarded, setOnboarded } from '../services/wordStorage';
+import { getStorageHealth, clearStorageHealth, hasOnboarded, setOnboarded } from '../services/wordStorage';
 import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
 import { useTheme } from '../theme/ThemeContext';
 import { initialNavigationState, navigationFlowReducer, projectedScreen, requestedScreenFromUrl, requestedWordFromUrl, shouldShowBottomTabs } from './navigationFlow';
 import { normalizeWord } from '../utils/normalizeWord';
+import { useAuth } from '../context/AuthContext';
+import { syncAuthenticatedData } from '../services/cloudSync';
 
 export function AppNavigator() {
   const { isTabletUp } = useResponsiveLayout();
   const { colors } = useTheme();
+  const { session } = useAuth();
   const [ready, setReady] = useState(false);
   const [onboarded, setOnboardedState] = useState(false);
   const [words, setWords] = useState<WordEntry[]>([]);
   const [reviewHistory, setReviewHistory] = useState<ReviewSubmission[]>([]);
   const [storageError, setStorageError] = useState<string | null>(null);
+  const [storageRecovery, setStorageRecovery] = useState(false);
   const [nav, dispatch] = useReducer(navigationFlowReducer, undefined, () => initialNavigationState());
   const historyUrlRef = useRef<string | null>(null);
+  const previousSessionUserIdRef = useRef<string | null>(null);
   const findRequestedWord = useCallback((entries: WordEntry[]) => {
     const requestedWord = requestedWordFromUrl();
     if (!requestedWord) return undefined;
@@ -45,6 +51,7 @@ export function AppNavigator() {
     const [loadedWords, loadedHistory] = await Promise.all([loadSavedWords(), loadReviewSubmissions()]);
     setWords(loadedWords);
     setReviewHistory(loadedHistory);
+    setStorageRecovery(getStorageHealth().needsRecovery);
     return loadedWords;
   }, []);
   const reload = useCallback(async () => {
@@ -65,6 +72,7 @@ export function AppNavigator() {
         setOnboardedState(didOnboard);
         setWords(loaded);
         setReviewHistory(loadedHistory);
+        setStorageRecovery(getStorageHealth().needsRecovery);
         const focus = findRequestedWord(loaded) || loaded.find((word) => word.normalized_word === 'resilient') || loaded[0];
         dispatch({ type: 'hydrateFromUrl', screen: requestedScreenFromUrl(), focus });
       } catch {
@@ -105,6 +113,29 @@ export function AppNavigator() {
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
   }, [findRequestedWord, ready, words]);
+
+  useEffect(() => {
+    if (!session?.user.id) return;
+    let mounted = true;
+    void syncAuthenticatedData()
+      .then(() => {
+        if (mounted) void reload();
+      })
+      .catch(() => undefined);
+    return () => { mounted = false; };
+  }, [reload, session?.user.id]);
+
+  useEffect(() => {
+    if (!ready) return;
+    const nextUserId = session?.user.id || null;
+    const previousUserId = previousSessionUserIdRef.current;
+    previousSessionUserIdRef.current = nextUserId;
+    if (previousUserId !== nextUserId) clearStorageHealth();
+    if (!previousUserId || previousUserId === nextUserId) return;
+    setWords([]);
+    setReviewHistory([]);
+    void reload();
+  }, [ready, reload, session?.user.id]);
 
   if (!ready) return <PhoneFrame><View style={{ flex: 1, backgroundColor: colors.background }} /></PhoneFrame>;
   if (storageError) return <PhoneFrame><View style={{ flex: 1, justifyContent: 'center', backgroundColor: colors.page }}><ErrorState message={storageError} onRetry={reload} retryLabel="Retry loading data" /></View></PhoneFrame>;
@@ -149,7 +180,10 @@ export function AppNavigator() {
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.page }} edges={['top', 'left', 'right']}>
         <View style={{ flex: 1, flexDirection: isTabletUp ? 'row' : 'column' }}>
           {isTabletUp && <DesktopNavigation active={nav.tab} onChange={(tab) => dispatch({ type: 'openTab', tab })} />}
-          <View style={{ flex: 1 }}>{content}</View>
+          <View style={{ flex: 1 }}>
+            {storageRecovery && <StorageRecoveryNotice onOpenProfile={() => dispatch({ type: 'openTab', tab: 'Profile' })} />}
+            <View style={{ flex: 1 }}>{content}</View>
+          </View>
         </View>
         {!isTabletUp && shouldShowBottomTabs(nav) && <BottomTabs active={nav.tab} onChange={(tab) => dispatch({ type: 'openTab', tab })} />}
         {!isTabletUp && <AppMenu visible={nav.menuOpen} active={nav.tab} onClose={() => dispatch({ type: 'closeMenu' })} onNavigate={(tab) => dispatch({ type: 'openTab', tab })} />}

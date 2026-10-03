@@ -5,11 +5,11 @@ import { useTheme } from '../theme/ThemeContext';
 import { radius, spacing } from '../theme/spacing';
 import { typography } from '../theme/typography';
 
-export function PrimaryButton({ title, onPress, variant = 'primary', disabled = false }: { title: string; onPress: () => void; variant?: 'primary' | 'ghost' | 'danger'; disabled?: boolean }) {
+export function PrimaryButton({ title, onPress, variant = 'primary', disabled = false, busy = false, accessibilityHint }: { title: string; onPress: () => void; variant?: 'primary' | 'ghost' | 'danger'; disabled?: boolean; busy?: boolean; accessibilityHint?: string }) {
   const { colors } = useTheme();
   const styles = createStyles(colors);
   return (
-    <Pressable accessibilityRole="button" accessibilityState={{ disabled }} disabled={disabled} onPress={onPress} style={({ pressed }) => [styles.button, styles[variant], disabled && styles.disabled, pressed && { transform: [{ scale: 0.98 }] }]}>
+    <Pressable accessibilityRole="button" accessibilityHint={accessibilityHint} accessibilityState={{ disabled, busy }} disabled={disabled} onPress={onPress} style={({ pressed }) => [styles.button, styles[variant], disabled && styles.disabled, pressed && { transform: [{ scale: 0.98 }] }]}>
       <Text style={[styles.text, variant !== 'primary' && styles.altText]}>{title}</Text>
     </Pressable>
   );

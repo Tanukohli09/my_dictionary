@@ -77,24 +77,24 @@ export function ReviewScreen({ words, reload, goSearch }: { words: WordEntry[]; 
     <ScrollView style={styles.screen} contentContainerStyle={[styles.content, isTabletUp && styles.contentWide]} showsVerticalScrollIndicator={false}>
       <ResponsivePage style={isTabletUp && styles.reviewPageWide}>
           <View style={styles.titleRow}>
-            <Text style={[styles.title, isTabletUp && styles.titleWide]}>Review</Text>
+            <Text accessibilityRole="header" style={[styles.title, isTabletUp && styles.titleWide]}>Review</Text>
             <Text style={[styles.plant, isTabletUp && styles.plantWide]}>🌿</Text>
           </View>
           {completed ? (
             <View style={[styles.quizCard, isTabletUp && styles.quizCardWide]}>
-              <Text style={[styles.question, isTabletUp && styles.questionWide]}>Review complete!</Text>
+              <Text accessibilityRole="header" style={[styles.question, isTabletUp && styles.questionWide]}>Review complete!</Text>
               <Text style={styles.summaryText}>You answered {correctCount} of {session.totalQuestions} questions correctly.</Text>
               <PrimaryButton title="Start another review" onPress={startNewReview} />
             </View>
           ) : question ? (
             <View style={[styles.quizCard, isTabletUp && styles.quizCardWide]}>
-              <Text style={[styles.question, isTabletUp && styles.questionWide]}>What does{`\n`}“{question.word.word}” mean?</Text>
+              <Text accessibilityRole="header" style={[styles.question, isTabletUp && styles.questionWide]}>What does{`\n`}“{question.word.word}” mean?</Text>
               {question.options.map((option, i) => {
                 const chosen = shownSelected === i;
                 const correct = shownSelected !== null && i === question.correctIndex;
-                return <Pressable key={`${question.word.id}-${i}-${option}`} accessibilityRole="button" accessibilityLabel={`Choose answer ${String.fromCharCode(65 + i)}: ${option}`} accessibilityState={{ selected: chosen }} onPress={() => answer(i)} style={[styles.option, correct && styles.correct, chosen && !correct && styles.wrong]}><Text style={styles.optionText}>{String.fromCharCode(65 + i)})  {option}</Text><Text style={styles.mark}>{correct ? '✓' : chosen ? '×' : ''}</Text></Pressable>;
+                return <Pressable key={`${question.word.id}-${i}-${option}`} accessibilityRole="button" accessibilityLabel={`Choose answer ${String.fromCharCode(65 + i)}: ${option}`} accessibilityHint={activeAnswer ? 'Answer recorded. Activate Next review question to continue.' : 'Select this answer.'} accessibilityState={{ selected: chosen, disabled: !!activeAnswer }} disabled={!!activeAnswer} onPress={() => answer(i)} style={[styles.option, correct && styles.correct, chosen && !correct && styles.wrong]}><Text style={styles.optionText}>{String.fromCharCode(65 + i)})  {option}</Text><Text style={styles.mark}>{correct ? '✓' : chosen ? '×' : ''}</Text></Pressable>;
               })}
-              <View style={styles.footer}><Text style={styles.progress}>{Math.min(session!.currentIndex + 1, session!.totalQuestions)} / {session!.totalQuestions}</Text>{shownSelected !== null && <Pressable accessibilityRole="button" accessibilityLabel="Next review question" style={styles.next} onPress={() => setSession((current) => current ? advanceReviewSession(current) : current)}><Text style={styles.nextText}>Next</Text></Pressable>}</View>
+              <View style={styles.footer}><Text accessibilityLiveRegion="polite" style={styles.progress}>{Math.min(session!.currentIndex + 1, session!.totalQuestions)} / {session!.totalQuestions}</Text>{shownSelected !== null && <Pressable accessibilityRole="button" accessibilityLabel="Next review question" accessibilityHint="Move to the next review question." style={styles.next} onPress={() => setSession((current) => current ? advanceReviewSession(current) : current)}><Text style={styles.nextText}>Next</Text></Pressable>}</View>
             </View>
           ) : null}
           <ReviewHistoryList history={history} styles={styles} isTabletUp={isTabletUp} />

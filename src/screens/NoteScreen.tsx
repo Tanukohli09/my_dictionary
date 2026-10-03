@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { ResponsivePage } from '../components/ResponsivePage';
 import { WordEntry } from '../models/WordEntry';
@@ -15,10 +15,20 @@ export function NoteScreen({ word, onBack, onSaved }: { word: WordEntry; onBack:
   const { colors } = useTheme();
   const styles = createStyles(colors);
   const [note, setNote] = useState(word.my_meaning || '');
-  async function save() { onSaved(await saveSavedWordMeaning(word, note)); }
+  const saving = useRef(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  async function save() {
+    if (saving.current) return;
+    saving.current = true;
+    setSaveError(null);
+    try { onSaved(await saveSavedWordMeaning(word, note)); }
+    catch { setSaveError('Could not save your meaning. Your text is still here. Please try again.'); }
+    finally { saving.current = false; }
+  }
   return (
     <ScrollView style={styles.screen} contentContainerStyle={[styles.content, isTabletUp && styles.contentWide]} showsVerticalScrollIndicator={false}>
       <ResponsivePage style={isTabletUp && styles.pageWide}>
+        {saveError && <Text accessibilityRole="alert" style={{ color: colors.error }}>{saveError}</Text>}
         <View style={styles.header}><Pressable accessibilityRole="button" accessibilityLabel="Back to word detail" onPress={onBack} hitSlop={8} style={styles.backButton}><Text style={styles.back}>‹</Text></Pressable><Text style={[styles.title, isTabletUp && styles.titleWide]}>My Meaning</Text><Pressable accessibilityRole="button" accessibilityLabel="Save my meaning" onPress={save} hitSlop={8} style={styles.saveButton}><Text style={styles.check}>✓</Text></Pressable></View>
         <View style={[styles.notePaper, isTabletUp && styles.notePaperWide]}>
           <TextInput accessibilityLabel="Your personal meaning" multiline value={note} onChangeText={setNote} placeholder="Write your own simple meaning..." placeholderTextColor={colors.muted} textAlignVertical="top" style={[styles.area, isTabletUp && styles.areaWide]} />

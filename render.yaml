@@ -19,6 +19,14 @@ services:
         value: /app/dist
       - key: EXPO_PUBLIC_DICTIONARY_API_URL
         value: /api/dictionary
+      - key: EXPO_PUBLIC_OFFLINE_FALLBACK
+        value: "false"
+      - key: EXPO_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: EXPO_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+      - key: EXPO_PUBLIC_GOOGLE_AUTH_ENABLED
+        value: "false"
       - key: DICTIONARY_ALLOWED_ORIGIN
         sync: false
       - key: DICTIONARY_PROVIDER_APPROVED

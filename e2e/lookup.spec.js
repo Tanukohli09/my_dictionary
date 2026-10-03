@@ -12,6 +12,11 @@ async function search(page, word) {
   await input.press('Enter');
 }
 
+test('does not show demo word-of-day content for a new user', async ({ page }) => {
+  await expect(page.getByText('Ephemeral', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('Your first word is waiting', { exact: true })).toBeVisible();
+});
+
 test('finds a word through the dictionary proxy', async ({ page }) => {
   await search(page, 'successword');
 
@@ -30,6 +35,7 @@ test('shows a useful not-found message', async ({ page }) => {
   await search(page, 'missingword');
 
   await expect(page.getByText(/could not find this word/i)).toBeVisible();
+  await expect(page.getByRole('alert')).toContainText(/could not find this word/i);
   await expect(page.getByRole('button', { name: 'Try again' })).toBeVisible();
 });
 

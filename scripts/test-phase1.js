@@ -6,6 +6,7 @@ const ts = require('typescript');
 const storage = new Map();
 const originalLoad = Module._load;
 Module._load = function patchedLoad(request, parent, isMain) {
+  if (request === './auth') return { getCurrentAuthUserId: async () => null, supabase: null };
   if (request === '@react-native-async-storage/async-storage') {
     return { __esModule: true, default: {
       async getItem(key) { return storage.has(key) ? storage.get(key) : null; },

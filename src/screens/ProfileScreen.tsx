@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { AccountCard } from '../components/AccountCard';
 import { OwlMascot } from '../components/OwlMascot';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ResponsivePage } from '../components/ResponsivePage';
@@ -7,6 +8,7 @@ import { ThemeToggle } from '../components/ThemeToggle';
 import { ReviewSubmission } from '../models/ReviewSubmission';
 import { WordEntry } from '../models/WordEntry';
 import { clearAllReviewSubmissions, clearAllWords } from '../services/wordStorage';
+import { queueCloudSync } from '../services/cloudSync';
 import { downloadOrShareLocalData, importLocalData, selectLocalDataBackup } from '../services/localDataTransfer';
 import { AppColors } from '../theme/colors';
 import { useTheme } from '../theme/ThemeContext';
@@ -115,6 +117,7 @@ export function ProfileScreen({ words, reviewHistory, onBack, onDictionary, onFa
         setDataBusy(true);
         setDataStatus(null);
         await Promise.all([clearAllWords(), clearAllReviewSubmissions()]);
+        void queueCloudSync().catch(() => undefined);
         await onDataChanged?.();
         setDataStatus('Saved words and review history were cleared.');
       } catch {
@@ -161,6 +164,8 @@ export function ProfileScreen({ words, reviewHistory, onBack, onDictionary, onFa
 
         <View style={[styles.themeRow, isTabletUp && styles.themeRowWide]}><ThemeToggle /></View>
 
+        <AccountCard />
+
         <View style={[styles.stats, isTabletUp && styles.statsWide]}>
           {mainStats.map((stat) => <ProfileStatCard key={stat.label} stat={stat} isWide={isTabletUp} onPress={() => runAction(stat.action)} styles={styles} colors={colors} />)}
         </View>
@@ -178,9 +183,9 @@ export function ProfileScreen({ words, reviewHistory, onBack, onDictionary, onFa
           <Text style={[styles.dataTitle, isTabletUp && styles.sectionWide]}>Your local data</Text>
           <Text style={styles.dataDescription}>Saved words and review history stay in this browser or device. Export a backup before clearing or moving your data.</Text>
           <View style={styles.dataButtons}>
-            <PrimaryButton disabled={dataBusy} title={dataBusy ? 'Working…' : 'Export backup'} onPress={exportData} variant="ghost" />
-            <PrimaryButton disabled={dataBusy} title="Import backup" onPress={importData} variant="ghost" />
-            <PrimaryButton disabled={dataBusy} title="Clear saved data" onPress={clearData} variant="danger" />
+            <PrimaryButton disabled={dataBusy} busy={dataBusy} title={dataBusy ? 'Working…' : 'Export backup'} onPress={exportData} variant="ghost" accessibilityHint="Save a backup file containing your local dictionary data." />
+            <PrimaryButton disabled={dataBusy} busy={dataBusy} title="Import backup" onPress={importData} variant="ghost" accessibilityHint="Restore dictionary data from a backup file." />
+            <PrimaryButton disabled={dataBusy} busy={dataBusy} title="Clear saved data" onPress={clearData} variant="danger" accessibilityHint="Delete all locally stored dictionary data." />
           </View>
           {!!dataStatus && <Text accessibilityLiveRegion="polite" style={styles.dataStatus}>{dataStatus}</Text>}
         </View>

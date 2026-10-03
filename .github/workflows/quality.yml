@@ -52,6 +52,42 @@ jobs:
       - name: Run Phase 11 controlled beta checks
         run: npm run test:phase11
 
+      - name: Run Phase 12 account and Android checks
+        run: npm run test:phase12
+
+      - name: Run Phase 13 authentication checks
+        run: npm run test:phase13
+
+      - name: Run Phase 14 cloud sync checks
+        run: npm run test:phase14
+
+      - name: Run Phase 15 release validation checks
+        run: npm run test:phase15
+
+      - name: Run Phase 16 account isolation checks
+        run: npm run test:phase16
+
+      - name: Run Phase 17 release preflight checks
+        run: npm run test:phase17
+
+      - name: Run Phase 18 account deletion checks
+        run: npm run test:phase18
+
+      - name: Run Phase 19 Android release checks
+        run: npm run test:phase19
+
+      - name: Run Phase 20 support diagnostics checks
+        run: npm run test:phase20
+
+      - name: Run Phase 21 empty-state checks
+        run: npm run test:phase21
+
+      - name: Run Phase 22 accessibility checks
+        run: npm run test:phase22
+
+      - name: Run Phase 23 storage recovery checks
+        run: npm run test:phase23
+
       - name: Run review verification
         run: npm run test:review
 
