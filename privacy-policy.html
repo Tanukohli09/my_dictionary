@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Privacy policy for the My Dictionary app.">
+  <title>Privacy Policy — My Dictionary</title>
+  <style>
+    :root { color-scheme: light; font: 16px/1.65 system-ui, -apple-system, "Segoe UI", sans-serif; color: #202536; background: #f7f8fb; }
+    body { margin: 0; }
+    main { max-width: 820px; margin: 0 auto; padding: 32px 20px 56px; }
+    article, header { background: #fff; border: 1px solid #e4e7ee; border-radius: 18px; padding: 24px; }
+    header { margin-bottom: 16px; }
+    h1, h2 { line-height: 1.25; color: #182033; }
+    h1 { margin: 6px 0 4px; font-size: clamp(2rem, 6vw, 2.6rem); }
+    h2 { margin-top: 30px; font-size: 1.25rem; }
+    p, li { max-width: 72ch; }
+    a { color: #285cc4; text-underline-offset: 3px; }
+    .brand { font-weight: 700; letter-spacing: .02em; }
+    .meta, footer { color: #555f73; font-size: .94rem; }
+    .callout { border-left: 4px solid #5574c8; padding: 10px 14px; background: #f3f6ff; }
+    li + li { margin-top: 8px; }
+    @media (max-width: 520px) { main { padding: 16px 12px 32px; } article, header { padding: 18px; border-radius: 14px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="brand">My Dictionary</div>
+      <h1>Privacy Policy</h1>
+      <p class="meta">Developer: My Dictionary · Privacy contact: <a href="mailto:mydictionay01@gmail.com">mydictionay01@gmail.com</a></p>
+      <p class="meta">Effective October 4, 2026 · Android package: com.tanukohli.mydictionary</p>
+      <p>This policy explains what information My Dictionary handles, how it is used, and how you can clear saved data or request account deletion.</p>
+    </header>
+
+    <article>
+      <h2>Using the app without an account</h2>
+      <p>You can use the dictionary and keep a local wordbook without signing in. The app stores saved words and their dictionary details, your custom meanings and notes, favourites, search and learning counts, review history, theme choice, and onboarding state in app or browser storage. Searching for a word adds its entry to your local wordbook.</p>
+      <p>If you choose Export backup, the app creates a backup of your saved dictionary and review data. The file is handled by your device's file or sharing interface, and you choose where to save or share it.</p>
+      <p>On a mobile device, the sign-in session is stored with the platform secure-storage facility when you choose Google sign-in. The web version stores its session in browser storage. Your local wordbook remains on that device or browser until you clear it, remove the app or browser data, or uninstall the app.</p>
+
+      <h2>Optional Google sign-in and cloud sync</h2>
+      <p>If Google sign-in and cloud sync are enabled in your build and you choose to use them, Google and Supabase process the identity information needed to sign you in, such as your email address, display name, and account identifier. Supabase stores a profile and the wordbook and review information you choose to synchronize, including saved words, meanings, notes, favourites, learning counts, and review history. The app uses this information to authenticate you and keep your wordbook synchronized across devices. You can continue using the local dictionary without signing in.</p>
+      <p>Cloud records are associated with your account. Database access rules restrict those records to the signed-in account. Google handles Google-account credentials; My Dictionary does not receive or store your Google password.</p>
+
+      <h2>Dictionary searches and service data</h2>
+      <p>When you search, the submitted word is sent to the dictionary endpoint configured for that build so it can return definitions. The Android preview build uses the hosted My Dictionary service. The repository also supports the public Free Dictionary API for builds without a configured hosted endpoint. The hosted service is configured to use Datamuse as its primary provider and Wiktionary as a fallback when enabled. Only providers enabled for a particular release receive its search words.</p>
+      <p>The hosted dictionary service temporarily caches results in memory. Its current defaults are up to one hour for a found result and five minutes for a not-found result; a service restart can clear the cache sooner. The service records operational events such as time, request ID, provider, response status, duration, and whether a result came from cache. Its normal lookup event does not include the submitted word, though the word is part of the request URL and may be visible to the hosting or dictionary provider. To limit automated requests, the service also uses the available network address in a short-lived in-memory rate-limit counter that expires after about one minute.</p>
+      <p>Datamuse says it discards its temporary query log at the end of the day. Wiktionary is hosted by the Wikimedia Foundation, and Free Dictionary API, Render, Supabase, Google, and GitHub process information under their own privacy terms. See their policies below for their handling and retention practices.</p>
+
+      <h2>Support and public issue reports</h2>
+      <p>You can contact support at <a href="mailto:mydictionay01@gmail.com">mydictionay01@gmail.com</a> or use the <a href="https://github.com/Tanukohli09/my_dictionary/issues">My Dictionary GitHub issue tracker</a>. Issues on this public repository may be visible to anyone. Do not post private notes, backup files, passwords, verification codes, or API keys there. If you send an email, Google processes that correspondence under its own privacy policy.</p>
+
+      <h2>How information is shared</h2>
+      <ul>
+        <li>Search words go to the dictionary endpoint and the provider used for that lookup.</li>
+        <li>If you choose cloud sync, account and synchronized wordbook data go to Google for sign-in and Supabase for authentication and storage.</li>
+        <li>Render hosts the current dictionary service. GitHub Pages hosts this policy and the external account-deletion page. These providers may process technical connection information when their services are used.</li>
+        <li>Support information is shared with Google when you email us, or with GitHub if you submit a public issue.</li>
+      </ul>
+      <p>The current app code does not intentionally display ads or use a product-analytics SDK. My Dictionary does not sell your wordbook or use it to build advertising profiles.</p>
+
+      <h2>Retention and deletion</h2>
+      <p>Local data stays in app or browser storage until you clear it or remove that storage. To keep your account but clear saved words and review history, open Profile and choose <strong>Clear saved data</strong>. If cloud sync is enabled for your signed-in account, the app marks those records for cloud removal and sends the deletion when sync next succeeds. This does not delete your account or sign-in. In-app account deletion removes the active My Dictionary account and its associated profile, synchronized word entries, and review records, and clears that account's local cache on the device where you perform the deletion. Local copies on your other devices cannot be erased remotely; clear the saved data or uninstall My Dictionary on each such device.</p>
+      <p>You can also use the <a href="./delete-account.html">My Dictionary data-management and account-deletion page</a> for steps to clear saved data or request account and synchronized-data deletion without reinstalling the app. We verify account-deletion requests and aim to complete them within 30 days. Provider-managed security logs or backups, where enabled, may retain copies until their normal retention period expires; those schedules depend on the provider and service plan.</p>
+      <p>The current Render Hobby service-log retention is seven days. Other Render plans and Supabase project plans have different log or backup schedules. Datamuse states that its query log is discarded at the end of the day. The provider links below describe their own practices.</p>
+
+      <h2>Security</h2>
+      <p>Configured online services use HTTPS. Native sign-in sessions use platform secure storage, and cloud database access is scoped to the authenticated user. The local wordbook is stored in app or browser storage. No internet service or storage method can guarantee absolute security, so keep your device protected and avoid sharing private notes or backups in public support channels.</p>
+
+      <h2>Third-party privacy information</h2>
+      <ul>
+        <li><a href="https://policies.google.com/privacy">Google Privacy Policy</a></li>
+        <li><a href="https://supabase.com/privacy">Supabase Privacy Policy</a></li>
+        <li><a href="https://render.com/privacy">Render Privacy Policy</a> and <a href="https://render.com/docs/logging">Render log retention</a></li>
+        <li><a href="https://www.datamuse.com/api/">Datamuse API information and query privacy</a></li>
+        <li><a href="https://foundation.wikimedia.org/wiki/Policy:Privacy_policy/en">Wikimedia Foundation Privacy Policy</a></li>
+        <li><a href="https://dictionaryapi.dev/">Free Dictionary API information</a></li>
+        <li><a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub Privacy Statement</a></li>
+      </ul>
+
+      <h2>Contact and changes</h2>
+      <p>For privacy questions or requests, email <a href="mailto:mydictionay01@gmail.com">mydictionay01@gmail.com</a>. We will update this policy when the app's providers or data handling change.</p>
+      <p class="callout"><strong>Saved data and account deletion:</strong> Use Profile → Clear saved data to remove the saved wordbook and review history while keeping your account. Use the <a href="./delete-account.html">data-management page</a> for instructions or to request account deletion.</p>
+    </article>
+
+    <footer><p>My Dictionary · Privacy Policy · Effective October 4, 2026</p></footer>
+  </main>
+</body>
+</html>
