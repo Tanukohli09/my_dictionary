@@ -10,6 +10,8 @@ import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
 
 const SUPPORT_URL = 'https://github.com/Tanukohli09/my_dictionary/issues';
 const REPOSITORY_URL = 'https://github.com/Tanukohli09/my_dictionary';
+const PRIVACY_POLICY_URL = 'https://tanukohli09.github.io/my_dictionary/privacy-policy.html';
+const ACCOUNT_DELETION_URL = 'https://tanukohli09.github.io/my_dictionary/delete-account.html';
 const DATAMUSE_URL = 'https://www.datamuse.com/api/';
 const WIKTIONARY_URL = 'https://en.wiktionary.org/';
 
@@ -63,20 +65,22 @@ function PrivacyContent({ styles }: { styles: InfoStyles }) {
         <Text style={styles.body}>When enabled, Google and the authentication provider process the account identity details needed to create and maintain your session, such as your email address and display name. You can continue using the local dictionary without signing in.</Text>
       </InfoSection>
       <InfoSection styles={styles} title="What happens when you search">
-        <Text style={styles.body}>The word you submit is sent to the My Dictionary server so it can request a definition. The service uses Datamuse as its primary provider and Wiktionary as a fallback. Those providers and the hosting platform may process requests under their own terms.</Text>
+        <Text style={styles.body}>The word you submit is sent to the dictionary endpoint configured for this build. The hosted My Dictionary service uses Datamuse as its primary provider and Wiktionary as a fallback; builds without a hosted endpoint can use the Free Dictionary API. The selected provider and hosting platform may process requests under their own terms.</Text>
       </InfoSection>
       <InfoSection styles={styles} title="Operational data">
         <Text style={styles.body}>The dictionary service keeps a short-lived definition cache and records operational events such as request IDs, provider, status, latency, and cache hits. In configured account-sync releases, the Supabase database also stores user-scoped saved words, notes, and review history for synchronization.</Text>
       </InfoSection>
       <InfoSection styles={styles} title="Your choices">
-        <Text style={styles.body}>Use Export backup before changing devices, and use Clear saved data in Profile when you want to remove the local wordbook. If you sign in, you can sign out from Profile. Clearing browser site data or uninstalling the app also removes local storage.</Text>
+        <Text style={styles.body}>Use Export backup before changing devices, and use Clear saved data in Profile when you want to remove the local wordbook. If you sign in, you can sign out from Profile or request account deletion in the app. Clearing browser site data or uninstalling the app also removes local storage.</Text>
+        <ExternalLink styles={styles} label="Read the full Privacy Policy" url={PRIVACY_POLICY_URL} />
+        <ExternalLink styles={styles} label="Request account and cloud-data deletion" url={ACCOUNT_DELETION_URL} />
       </InfoSection>
       <InfoSection styles={styles} title="Dictionary sources">
         <Text style={styles.body}>Definitions are supplied by the configured dictionary providers. Review their policies for current terms and attribution details.</Text>
         <ExternalLink styles={styles} label="Open Datamuse API information" url={DATAMUSE_URL} />
         <ExternalLink styles={styles} label="Open Wiktionary" url={WIKTIONARY_URL} />
       </InfoSection>
-      <Text style={styles.lastUpdated}>Last reviewed: October 2026. This notice should be reviewed again before a public launch with a custom domain, analytics, account sync, or additional providers.</Text>
+      <Text style={styles.lastUpdated}>Last reviewed: October 2026. Review this notice whenever the app's providers, account-sync behavior, or data handling change.</Text>
     </View>
   );
 }
