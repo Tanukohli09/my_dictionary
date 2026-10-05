@@ -8,9 +8,9 @@ Use this note to continue the work in a new chat. The authoritative Git checkout
 
 - Project: Expo / React Native vocabulary dictionary, with a web app, local-first saved words, optional Google sign-in/cloud sync, and Android builds.
 - Git root: `/home/tanu09/Downloads/my_dictionary-main/recovered-release`
-- Branch: `main`; remote privacy/deletion commits were fetched and merged locally as `8d0296c` (`Merge remote-tracking branch 'origin/main'`). The Oct 6 app/server changes and release assets are being committed and pushed; inspect `git status` for the exact state.
+- Branch: `main`; remote privacy/deletion commits were fetched and merged locally as `8d0296c` (`Merge remote-tracking branch 'origin/main'`). Release preparation is committed as `c4f59ce` (`Prepare My Dictionary Play release`) and is pending push/deployment verification.
 - Staging URL: <https://my-dictionary-staging.onrender.com/>
-- The Oct 6 changes include the Play release configuration, server-side Wiktionary identification and request limits, licensing attribution, onboarding/profile mobile fixes, account-deletion wording, and store assets. `DEPENDENCY_REMEDIATION.md` records the latest security review. Preserve any later user changes; do not reset or force-push.
+- The Oct 6 changes include the Play release configuration, server-side Wiktionary identification and request limits, licensing attribution, onboarding/profile mobile fixes, account-deletion wording, and store assets. `DEPENDENCY_REMEDIATION.md` records the latest security review. `PRIVACY_POLICY_DRAFT_FOR_REVIEW.md` remains an untracked owner-review draft and must not be mistaken for the live policy. Preserve any later user changes; do not reset or force-push.
 
 ## Recent work
 
