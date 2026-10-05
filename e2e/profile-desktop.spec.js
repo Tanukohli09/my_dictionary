@@ -70,3 +70,13 @@ test('desktop profile action cards navigate to useful sections', async ({ page }
   await page.getByRole('button', { name: 'Open review from reviewed words' }).click();
   await expect(page).toHaveURL(/screen=review/);
 });
+
+test('profile omits the alphabet bar graph and keeps local data controls', async ({ page }) => {
+  await page.goto('/?screen=profile', { waitUntil: 'networkidle' });
+
+  await expect(page.getByText('Words by alphabet', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('Your local data', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Export backup' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Import backup' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Clear saved data' })).toBeVisible();
+});

@@ -27,6 +27,10 @@ const RATE_LIMIT_MAX = Number(process.env.DICTIONARY_RATE_LIMIT_MAX || 60);
 const RATE_LIMIT_WINDOW_MS = Number(
   process.env.DICTIONARY_RATE_LIMIT_WINDOW_MS || 60 * 1000,
 );
+const WIKTIONARY_MAX_CONCURRENT_REQUESTS = 3;
+const WIKTIONARY_MAX_REQUESTS_PER_MINUTE = 180;
+const WIKTIONARY_RATE_WINDOW_MS = 60 * 1000;
+const WIKTIONARY_MAX_PENDING_REQUESTS = 60;
 const TRUST_PROXY = process.env.DICTIONARY_TRUST_PROXY === 'true';
 const IS_PRODUCTION = process.env.NODE_ENV === 'production' || process.env.DICTIONARY_ENV === 'production';
 const PROVIDER_APPROVED = process.env.DICTIONARY_PROVIDER_APPROVED === 'true';
@@ -55,6 +59,10 @@ const cache = new Map();
 const inFlight = new Map();
 const rateLimits = new Map();
 const providerHealth = new Map();
+let wiktionaryInFlightCount = 0;
+const wiktionaryWaitQueue = [];
+const wiktionaryRequestTimestamps = [];
+let wiktionaryDrainTimer = null;
 const metrics = {
   cacheHits: 0,
   dictionaryRequests: 0,
@@ -84,6 +92,59 @@ function defaultUpstream(provider) {
   if (provider === 'dictionaryapi') return 'https://api.dictionaryapi.dev/api/v2/entries/en';
   if (provider === 'wiktionary') return 'https://en.wiktionary.org/api/rest_v1/page/definition';
   return 'https://api.datamuse.com/words';
+}
+
+function acquireWiktionarySlot() {
+  if (wiktionaryWaitQueue.length >= WIKTIONARY_MAX_PENDING_REQUESTS) {
+    const error = new Error('Wiktionary request queue is full.');
+    error.statusCode = 503;
+    return Promise.reject(error);
+  }
+
+  return new Promise((resolve) => {
+    wiktionaryWaitQueue.push(resolve);
+    drainWiktionaryQueue();
+  });
+}
+
+function drainWiktionaryQueue() {
+  if (wiktionaryDrainTimer) return;
+
+  let now = Date.now();
+  while (wiktionaryRequestTimestamps.length > 0
+    && now - wiktionaryRequestTimestamps[0] >= WIKTIONARY_RATE_WINDOW_MS) {
+    wiktionaryRequestTimestamps.shift();
+  }
+
+  while (wiktionaryWaitQueue.length > 0
+    && wiktionaryInFlightCount < WIKTIONARY_MAX_CONCURRENT_REQUESTS
+    && wiktionaryRequestTimestamps.length < WIKTIONARY_MAX_REQUESTS_PER_MINUTE) {
+    const next = wiktionaryWaitQueue.shift();
+    wiktionaryInFlightCount += 1;
+    wiktionaryRequestTimestamps.push(now);
+    next();
+
+    now = Date.now();
+    while (wiktionaryRequestTimestamps.length > 0
+      && now - wiktionaryRequestTimestamps[0] >= WIKTIONARY_RATE_WINDOW_MS) {
+      wiktionaryRequestTimestamps.shift();
+    }
+  }
+
+  if (wiktionaryWaitQueue.length > 0
+    && wiktionaryInFlightCount < WIKTIONARY_MAX_CONCURRENT_REQUESTS
+    && wiktionaryRequestTimestamps.length >= WIKTIONARY_MAX_REQUESTS_PER_MINUTE) {
+    const nextAllowedAt = wiktionaryRequestTimestamps[0] + WIKTIONARY_RATE_WINDOW_MS;
+    wiktionaryDrainTimer = setTimeout(() => {
+      wiktionaryDrainTimer = null;
+      drainWiktionaryQueue();
+    }, Math.max(1, nextAllowedAt - Date.now()));
+  }
+}
+
+function releaseWiktionarySlot() {
+  wiktionaryInFlightCount = Math.max(0, wiktionaryInFlightCount - 1);
+  drainWiktionaryQueue();
 }
 
 function requestId(request) {
@@ -204,7 +265,11 @@ function cacheResult(word, result, ttlMs) {
 }
 
 function getUpstreamHeaders() {
-  const headers = { Accept: 'application/json' };
+  const headers = {
+    Accept: 'application/json',
+    'User-Agent': process.env.DICTIONARY_USER_AGENT?.trim()
+      || 'MyDictionary/1.0.0 (https://tanukohli09.github.io/my_dictionary/)',
+  };
   const apiKey = process.env.DICTIONARY_API_KEY;
   const apiKeyHeader = process.env.DICTIONARY_API_KEY_HEADER || 'X-API-Key';
 
@@ -335,12 +400,19 @@ function errorResult(provider, statusCode, message) {
 }
 
 async function fetchProvider(provider, baseUrl, word) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   const startedAt = Date.now();
+  let timeout;
+  let wiktionarySlotAcquired = false;
   let result;
 
   try {
+    if (provider === 'wiktionary') {
+      await acquireWiktionarySlot();
+      wiktionarySlotAcquired = true;
+    }
+
+    const controller = new AbortController();
+    timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
     const response = await fetch(providerUrl(provider, baseUrl, word), {
       headers: getUpstreamHeaders(),
       signal: controller.signal,
@@ -380,16 +452,20 @@ async function fetchProvider(provider, baseUrl, word) {
     return result;
   } catch (error) {
     const timedOut = error?.name === 'AbortError';
+    const queueFull = error?.statusCode === 503;
     result = errorResult(
       provider,
-      timedOut ? 504 : 502,
-      timedOut
-        ? 'The dictionary provider took too long to respond.'
+      queueFull ? 503 : timedOut ? 504 : 502,
+      queueFull
+        ? 'The dictionary provider is busy. Please try again shortly.'
+        : timedOut
+          ? 'The dictionary provider took too long to respond.'
         : 'The dictionary provider is temporarily unavailable.',
     );
     return result;
   } finally {
-    clearTimeout(timeout);
+    if (timeout) clearTimeout(timeout);
+    if (wiktionarySlotAcquired) releaseWiktionarySlot();
     const durationMs = Date.now() - startedAt;
     const statusCode = result?.statusCode || 502;
     const previous = providerHealth.get(provider) || { failureCount: 0, status: 'unknown' };

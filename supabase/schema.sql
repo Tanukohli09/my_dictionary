@@ -57,13 +57,24 @@ create index if not exists word_entries_user_updated_idx
 create index if not exists review_submissions_user_completed_idx
   on public.review_submissions (user_id, completed_at desc);
 
+-- Keep future public objects unexposed by default. Grant the required access
+-- explicitly below for each table used by the signed-in app.
+alter default privileges for role postgres in schema public
+  revoke all on tables from anon, authenticated, service_role;
+alter default privileges for role postgres in schema public
+  revoke all on sequences from anon, authenticated, service_role;
+alter default privileges for role postgres in schema public
+  revoke execute on functions from anon, authenticated, service_role;
+alter default privileges for role postgres in schema public
+  revoke execute on functions from public;
+
 alter table public.profiles enable row level security;
 alter table public.word_entries enable row level security;
 alter table public.review_submissions enable row level security;
 
 -- The project disables automatic Data API grants. Expose only these tables
 -- to authenticated clients; row policies below restrict each account.
-revoke all on table public.profiles, public.word_entries, public.review_submissions from anon;
+revoke all on table public.profiles, public.word_entries, public.review_submissions from public, anon, authenticated;
 grant usage on schema public to authenticated;
 grant select, update on table public.profiles to authenticated;
 grant select, insert, update, delete on table public.word_entries, public.review_submissions to authenticated;

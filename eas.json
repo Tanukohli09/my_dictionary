@@ -8,10 +8,15 @@
       "distribution": "internal"
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_DICTIONARY_API_URL": "https://my-dictionary-staging.onrender.com/api/dictionary",
+        "EXPO_PUBLIC_GOOGLE_AUTH_ENABLED": "true"
+      }
     },
     "production": {
       "autoIncrement": true,
+      "environment": "production",
       "android": {
         "buildType": "app-bundle"
       }

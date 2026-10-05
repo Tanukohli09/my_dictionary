@@ -2,6 +2,7 @@
   "expo": {
     "name": "My Dictionary",
     "slug": "my-dictionary",
+    "owner": "tanukohlis-team",
     "scheme": "mydictionary",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -35,9 +36,16 @@
       [
         "expo-splash-screen",
         {
+          "image": "./src/assets/app-icon-foreground.png",
+          "imageWidth": 200,
           "backgroundColor": "#FFF8E7"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "b875fd2d-0b12-4b7e-aff9-30dcb75ec215"
+      }
+    }
   }
 }

@@ -24,7 +24,7 @@ export function AccountCard({ compact = false }: { compact?: boolean }) {
       : 'Your saved words and review history sync when you are online.';
 
   async function requestDeleteAccount() {
-    const message = 'This permanently deletes your Google account, synchronized words, notes, and review history. Local data on this device will also be removed. Export a backup first if you need one.';
+    const message = 'This permanently deletes your My Dictionary account, synchronized words, notes, and review history. Local data on this device will also be removed. Your Google account remains active. Export a backup first if you need one.';
     if (Platform.OS === 'web' && typeof window !== 'undefined') {
       if (window.confirm(`Delete your account?\n\n${message}`)) await deleteAccount();
       return;

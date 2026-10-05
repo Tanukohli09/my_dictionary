@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { OwlMascot } from '../components/OwlMascot';
 import { PrimaryButton } from '../components/PrimaryButton';
@@ -14,33 +14,37 @@ export function OnboardingScreen({ onStart, onPrivacy, onSupport }: { onStart: (
   const { colors } = useTheme();
   const styles = createStyles(colors);
   return (
-    <SafeAreaView style={[styles.screen, isTabletUp && styles.screenWide]}>
-      <Text style={[styles.spark, styles.sparkLeft]}>✦</Text>
-      <Text style={[styles.spark, styles.sparkRight]}>✦</Text>
-      <View style={[styles.layout, isTabletUp && styles.layoutWide]}>
-        <View style={styles.copyColumn}>
-          <View style={[styles.titleBlock, isTabletUp && styles.titleBlockWide]}>
-            <Text style={[styles.title, isTabletUp && styles.titleWide]}>My{`\n`}Dictionary</Text>
-            <Text style={styles.subtitle}>Your words, your world.</Text>
+    <SafeAreaView style={styles.screen}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={[styles.content, isTabletUp && styles.contentWide]} showsVerticalScrollIndicator={false}>
+        <Text style={[styles.spark, styles.sparkLeft]}>✦</Text>
+        <Text style={[styles.spark, styles.sparkRight]}>✦</Text>
+        <View style={[styles.layout, isTabletUp && styles.layoutWide]}>
+          <View style={styles.copyColumn}>
+            <View style={[styles.titleBlock, isTabletUp && styles.titleBlockWide]}>
+              <Text style={[styles.title, isTabletUp && styles.titleWide]}>My{`\n`}Dictionary</Text>
+              <Text style={styles.subtitle}>Your words, your world.</Text>
+            </View>
+            <Text style={[styles.body, isTabletUp && styles.bodyWide]}>Search any word. We’ll show the meaning and save it alphabetically in your personal wordbook.</Text>
+            <Text style={styles.note}>Your saved words stay on this browser or device. Searches use the dictionary service to find definitions.</Text>
+            <PrimaryButton title="Start with your first word" onPress={onStart} />
+            <AccountCard compact />
+            <View style={styles.footerLinks}>
+              <Pressable accessibilityRole="link" accessibilityLabel="Read the privacy notice" onPress={onPrivacy}><Text style={styles.footerLink}>Privacy</Text></Pressable>
+              <Text style={styles.footerSeparator}>·</Text>
+              <Pressable accessibilityRole="link" accessibilityLabel="Open support information" onPress={onSupport}><Text style={styles.footerLink}>Support</Text></Pressable>
+            </View>
           </View>
-          <Text style={[styles.body, isTabletUp && styles.bodyWide]}>Search any word. We’ll show the meaning and save it alphabetically in your personal wordbook.</Text>
-          <Text style={styles.note}>Your saved words stay on this browser or device. Searches use the dictionary service to find definitions.</Text>
-          <PrimaryButton title="Start with your first word" onPress={onStart} />
-          <AccountCard compact />
-          <View style={styles.footerLinks}>
-            <Pressable accessibilityRole="link" accessibilityLabel="Read the privacy notice" onPress={onPrivacy}><Text style={styles.footerLink}>Privacy</Text></Pressable>
-            <Text style={styles.footerSeparator}>·</Text>
-            <Pressable accessibilityRole="link" accessibilityLabel="Open support information" onPress={onSupport}><Text style={styles.footerLink}>Support</Text></Pressable>
-          </View>
+          <View style={[styles.owlStage, isTabletUp && styles.owlStageWide]}><OwlMascot size={isTabletUp ? 280 : 205} variant="hero" /></View>
         </View>
-        <View style={[styles.owlStage, isTabletUp && styles.owlStageWide]}><OwlMascot size={isTabletUp ? 280 : 205} variant="hero" /></View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 const createStyles = (colors: AppColors) => StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.page, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 30 },
-  screenWide: { paddingHorizontal: 64 },
+  screen: { flex: 1, backgroundColor: colors.page },
+  scrollView: { flex: 1 },
+  content: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 30, paddingVertical: 24 },
+  contentWide: { paddingHorizontal: 64 },
   layout: { alignItems: 'center' },
   layoutWide: { width: '100%', maxWidth: 980, flexDirection: 'row', justifyContent: 'center', gap: 72 },
   copyColumn: { alignItems: 'center', maxWidth: 430 },

@@ -14,7 +14,6 @@ import { AppColors } from '../theme/colors';
 import { useTheme } from '../theme/ThemeContext';
 import { typography } from '../theme/typography';
 import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
-import { groupAlphabetically } from '../utils/groupWords';
 import { calculateCurrentStreak } from '../utils/reviewStats';
 
 type ProfileScreenProps = {
@@ -49,10 +48,8 @@ export function ProfileScreen({ words, reviewHistory, onBack, onDictionary, onFa
   const xp = words.length * 10 + reviewed * 5;
   const level = Math.max(1, Math.floor(xp / 150) + 1);
   const next = level * 150;
-  const groups = groupAlphabetically(words);
   const reviewAttempts = reviewHistory.length;
   const currentStreak = calculateCurrentStreak(reviewHistory);
-  const rows = Object.keys(groups).sort().slice(0, 8).map((letter) => [letter, groups[letter].length, Math.max(8, (groups[letter].length / Math.max(1, words.length)) * 100)] as const);
   const [dataBusy, setDataBusy] = useState(false);
   const [dataStatus, setDataStatus] = useState<string | null>(null);
 
@@ -174,11 +171,6 @@ export function ProfileScreen({ words, reviewHistory, onBack, onDictionary, onFa
           {smallStats.map((stat) => <ProfileMiniCard key={stat.label} stat={stat} isWide={isTabletUp} onPress={() => runAction(stat.action)} styles={styles} />)}
         </View>
 
-        <Text style={[styles.section, isTabletUp && styles.sectionWide]}>Words by alphabet</Text>
-        <View style={[styles.alphaBox, isTabletUp && styles.alphaBoxWide]}>
-          {rows.length ? rows.map(([letter, count, width]) => <View key={letter} style={[styles.alphaRow, isTabletUp && styles.alphaRowWide]}><Text style={styles.alphaLetter}>{letter}</Text><View style={styles.bar}><View style={[styles.barFill, { width: `${width}%` }]} /></View><Text style={styles.alphaCount}>{count}</Text></View>) : <Text style={styles.emptyText}>Save words to see your alphabet spread.</Text>}
-        </View>
-
         <View style={[styles.dataCard, isTabletUp && styles.dataCardWide]}>
           <Text style={[styles.dataTitle, isTabletUp && styles.sectionWide]}>Your local data</Text>
           <Text style={styles.dataDescription}>Saved words and review history stay in this browser or device. Export a backup before clearing or moving your data.</Text>
@@ -272,18 +264,8 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
   smallStatValue: { color: colors.text, fontSize: 11, fontWeight: '900', textAlign: 'center' },
   smallStatValueWide: { fontSize: 16, color: colors.text, textAlign: 'left' },
   smallStatHint: { color: colors.muted, fontSize: 10, marginTop: 3 },
-  section: { color: colors.text, fontWeight: '900', fontSize: 13, marginBottom: 10 },
   sectionWide: { fontSize: 16, marginBottom: 12 },
-  alphaBox: { gap: 11 },
-  alphaBoxWide: { borderWidth: 1, borderColor: colors.border, borderRadius: 16, backgroundColor: colors.cardLight, padding: 24, gap: 14 },
-  alphaRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  alphaRowWide: { minHeight: 20, gap: 16 },
-  alphaLetter: { color: colors.text, width: 18, fontSize: 11, fontWeight: '700' },
-  bar: { flex: 1, height: 6, backgroundColor: colors.input, borderRadius: 999, overflow: 'hidden' },
-  barFill: { height: '100%', backgroundColor: colors.green, borderRadius: 999 },
-  alphaCount: { width: 24, color: colors.text, textAlign: 'right', fontWeight: '800', fontSize: 12 },
-  emptyText: { color: colors.muted, fontSize: 13, lineHeight: 20 },
-  dataCard: { marginTop: 24, borderWidth: 1, borderColor: colors.border, borderRadius: 12, backgroundColor: colors.cardLight, padding: 16, gap: 10 },
+  dataCard: { marginTop: 0, borderWidth: 1, borderColor: colors.border, borderRadius: 12, backgroundColor: colors.cardLight, padding: 16, gap: 10 },
   infoCard: { marginTop: 14, borderWidth: 1, borderColor: colors.border, borderRadius: 12, backgroundColor: colors.cardLight, padding: 16, gap: 10 },
   dataCardWide: { borderRadius: 16, padding: 22, maxWidth: 760 },
   dataTitle: { color: colors.text, fontFamily: typography.serif, fontSize: 20, fontWeight: '900' },

@@ -177,7 +177,7 @@ export function AppNavigator() {
 
   return (
     <PhoneFrame>
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.page }} edges={['top', 'left', 'right']}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.page }} edges={['top', 'left', 'right', 'bottom']}>
         <View style={{ flex: 1, flexDirection: isTabletUp ? 'row' : 'column' }}>
           {isTabletUp && <DesktopNavigation active={nav.tab} onChange={(tab) => dispatch({ type: 'openTab', tab })} />}
           <View style={{ flex: 1 }}>
