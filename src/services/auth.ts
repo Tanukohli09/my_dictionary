@@ -109,6 +109,7 @@ export async function signInWithGoogle() {
     provider: 'google',
     options: {
       redirectTo: getAuthRedirectUri(),
+      queryParams: { prompt: 'select_account' },
       skipBrowserRedirect: Platform.OS !== 'web',
     },
   });

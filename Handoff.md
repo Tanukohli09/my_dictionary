@@ -1,6 +1,6 @@
 # My Dictionary — Handoff
 
-Updated: October 6, 2026 (Asia/Kolkata)
+Updated: October 7, 2026 (Asia/Kolkata)
 
 Use this note to continue the work in a new chat. The authoritative Git checkout is the nested `recovered-release` directory, not its parent folder.
 
@@ -21,7 +21,7 @@ Use this note to continue the work in a new chat. The authoritative Git checkout
 - Phase 30 removes the Profile “Words by alphabet” graph while retaining local-data controls; the report records on-device visual verification.
 - Phase 31 enables Google auth in the local Android preview build and records a successful build/install on the connected Realme RMX2001. That APK is locally test-signed, not a Play Store artifact.
 - EAS project `@tanukohlis-team/my-dictionary` is linked, production public variables are configured for the production Supabase project and the free Render dictionary endpoint, and Expo's free plan is selected. The earlier production build was cancelled because it predated the account-deletion wording fix. No current production AAB has been built.
-- Production Supabase Google sign-in is enabled, its callback was registered in the existing Google OAuth client, and the OAuth audience was published to production. Supabase Auth logs show callback HTTP 500, `Unable to exchange external code`, provider `invalid_client` / client-secret error. The callback URL routing and production app configuration were verified; the Google OAuth client pair is still rejected. The owner must provide a fresh active OAuth client secret in Google Cloud and save it in production Supabase, then retry sign-in. A preexisting session remained intact and no new account was created. A temporary `http://localhost:8092/auth/callback` redirect remains allowlisted for diagnosis; remove it when auth testing is finished. **Real production sign-in, sync, and account deletion have not yet passed end-to-end acceptance.**
+- Production Supabase Google sign-in is enabled, its callback is registered in the existing Google OAuth client, and the OAuth audience is published to production. The earlier `invalid_client` callback failure stopped after the owner saved the active Google OAuth client secret in production Supabase; production-configured web sign-in then succeeded. To support switching between Google accounts, the sign-in request now asks Google to show its account chooser (`prompt=select_account`). On October 7, browser verification showed the chooser; the owner still needs to select and verify account B before two-account sync/isolation acceptance can pass. A temporary `http://localhost:8092/auth/callback` redirect remains allowlisted for testing; remove it when auth testing is finished. **Production sign-in works, but two-account sync/isolation, offline recovery, and account deletion have not yet passed end-to-end acceptance.**
 
 ## Verification evidence and limits
 
@@ -30,6 +30,7 @@ Use this note to continue the work in a new chat. The authoritative Git checkout
 - Phase 31: `npm run test:phase13`, typecheck, and targeted account Playwright tests passed; local Android release-variant build and in-place install succeeded. The existing phone session was preserved; no sign-out, uninstall, data clear, or account deletion was performed.
 - The reports are in `PHASE_29_ANDROID_MOBILE_CONTAINMENT.md`, `PHASE_30_PROFILE_SIMPLIFICATION.md`, and `PHASE_31_GOOGLE_AUTH_ANDROID_PREVIEW.md`.
 - On October 6, `npm run test:all` passed with loopback access enabled: TypeScript, production web export, all 25 script suites, and all 25 Playwright tests. The default sandbox run failed only because it denied local `127.0.0.1` server binds; the authorized rerun passed.
+- On October 7, the Google account-chooser regression check (`npm run test:phase13`) and `npm run typecheck` passed. The production-configured temporary web preview compiled `prompt=select_account`, and the browser showed Google's account chooser. Account B selection and the remaining acceptance checks are pending.
 - The post-push hosted monitor and strict/native release preflight evidence is in `PHASE_32_RELEASE_PREPARATION.md`.
 - An online `npm audit --json` on October 5 reported 16 high, zero moderate or critical findings. The affected `node-forge@1.4.0` and `braces@3.0.3` have no released patched versions in the reviewed advisories; npm's suggested Expo/React Native downgrades are incompatible and were not applied. See `DEPENDENCY_REMEDIATION.md`.
 
